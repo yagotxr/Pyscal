@@ -12,7 +12,7 @@ public class Token {
     }
 
     public String toString(){
-        return "<" + this.getNome() + "," + this.getLexema() + ">";
+        return "<" + this.getNome() + " , \"" + this.getLexema() + "\">";
     }
 
     public String getNome() {
