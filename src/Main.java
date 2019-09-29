@@ -18,7 +18,6 @@ public class Main {
             token = lexer.nextToken();
         }
 
-
         System.out.println("\n=>Tabela de simbolos:");
         lexer.printTS();
         lexer.closeFile();
