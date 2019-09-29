@@ -1,38 +1,30 @@
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Optional;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
 
+        final String FILE_PATH = "/Users/yagohenrique/Google Drive/College/6º Periodo/Automatos, Linguagens Formais e Compiladores/src/HelloWorld.txt";
+        File file = new File(FILE_PATH);
+        Lexer lexer = new Lexer(file);
+        Optional<Token> token;
 
-//        try (FileReader fileReader = new FileReader("/Users/yagohenrique/Google Drive/College/6º Periodo/Automatos, Linguagens Formais e Compiladores/src/HelloWorld.txt")) {
-//            int singleCharInt;
-//            char singleChar;
-//            while((singleCharInt = fileReader.read()) != -1) {
-//                singleChar = (char) singleCharInt;
-//
-//                //display one character at a time
-//                System.out.println(singleChar);
-//                System.out.println(singleCharInt);
-//            }
-//        }
+        lexer = Lexer('HelloWorld.txt')
 
-        RandomAccessFile reader = new RandomAccessFile("/Users/yagohenrique/Google Drive/College/6º Periodo/Automatos, Linguagens Formais e Compiladores/src/HelloWorld.txt", "r");
-        int singleCharInt;
-        char singleChar;
-            while((singleCharInt = reader.read()) != -1) {
-                singleChar = (char) singleCharInt;
+        System.out.println("\n=>Lista de tokens:");
 
-                //display one character at a time
+        while(token !=  and token.getNome() != Tag.EOF):
+        print(token.toString(), "Linha: " + str(token.getLinha()) + " Coluna: " + str(token.getColuna()))
+        token = lexer.proxToken()
 
-                System.out.println("Poiter: " + reader.getFilePointer());
-                if(singleChar == 's'){
-                    reader.seek(reader.getFilePointer() - 1);
-                }
-                System.out.println(singleChar);
-                System.out.println(singleCharInt);
-            }
+        print("\n=>Tabela de simbolos:")
+        lexer.printTS()
+        lexer.closeFile()
+
+        print('\n=> Fim da compilacao')
     }
 }

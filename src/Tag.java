@@ -46,5 +46,7 @@ public enum Tag {
     PONTO_VIRGULA, //;
     VIRGULA,  // ,
     A_PARENTESES,  // (
-    F_PARENTESES // )
+    F_PARENTESES, // )
+    A_COLCHETE, // [
+    F_COLCHETE, // ]
 }

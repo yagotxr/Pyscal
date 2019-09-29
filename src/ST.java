@@ -1,5 +1,6 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class ST {
 
@@ -50,10 +51,13 @@ public class ST {
 
         this.simbolTable.put("(", new Token(Tag.A_PARENTESES.toString(), "(", 0,0));
         this.simbolTable.put(")", new Token(Tag.F_PARENTESES.toString(), ")", 0,0));
+
+        this.simbolTable.put("[", new Token(Tag.A_COLCHETE.toString(), "[", 0,0));
+        this.simbolTable.put("]", new Token(Tag.F_COLCHETE.toString(), "]", 0,0));
     }
 
-    public Token getToken(String lexema){
-        return simbolTable.get(lexema);
+    public Optional<Token> getToken(String lexema){
+        return Optional.of(simbolTable.get(lexema));
     }
 
     public void addToken(String lexema, Token token){
