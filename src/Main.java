@@ -1,7 +1,5 @@
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.Optional;
 
 public class Main {
@@ -13,18 +11,18 @@ public class Main {
         Lexer lexer = new Lexer(file);
         Optional<Token> token;
 
-        lexer = Lexer('HelloWorld.txt')
-
         System.out.println("\n=>Lista de tokens:");
+        token = lexer.nextToken();
+        while(token.isPresent() && !token.get().getName().equals(Tag.EOF.toString())){
+            System.out.println(token.get().toString() + " Linha: " + token.get().getLine() + " Coluna: " + token.get().getColumn());
+            token = lexer.nextToken();
+        }
 
-        while(token !=  and token.getNome() != Tag.EOF):
-        print(token.toString(), "Linha: " + str(token.getLinha()) + " Coluna: " + str(token.getColuna()))
-        token = lexer.proxToken()
 
-        print("\n=>Tabela de simbolos:")
-        lexer.printTS()
-        lexer.closeFile()
+        System.out.println("\n=>Tabela de simbolos:");
+        lexer.printTS();
+        lexer.closeFile();
 
-        print('\n=> Fim da compilacao')
+        System.out.println("\n=> Fim da compilacao");
     }
 }

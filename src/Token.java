@@ -1,24 +1,32 @@
 public class Token {
 
-    private String nome, lexema;
-    private  int linha = 0, coluna = 0;
+    private String name, lexeme;
+    private  int line = 0, column = 0;
 
-    public Token(String nome, String lexema, int linha, int coluna) {
-        this.nome = nome;
-        this.lexema = lexema;
-        this.linha = linha;
-        this.coluna = coluna;
+    public Token(String name, String lexeme, int line, int column) {
+        this.name = name;
+        this.lexeme = lexeme;
+        this.line = line;
+        this.column = column;
     }
 
     public String toString(){
-        return "<" + this.getNome() + " , \"" + this.getLexema() + "\">";
+        return "<" + this.getName() + " , \"" + this.getLexeme() + "\">";
     }
 
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
-    public String getLexema() {
-        return lexema;
+    public String getLexeme() {
+        return lexeme;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public int getColumn() {
+        return column;
     }
 }

@@ -57,6 +57,10 @@ public class ST {
     }
 
     public Optional<Token> getToken(String lexema){
+        Token foundToken = simbolTable.get(lexema);
+        if(foundToken == null){
+            return Optional.empty();
+        }
         return Optional.of(simbolTable.get(lexema));
     }
 

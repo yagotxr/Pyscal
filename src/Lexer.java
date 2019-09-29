@@ -47,7 +47,7 @@ public class Lexer {
 
 
     public void returnPointer() throws IOException {
-        if((char)lookahead != '\0') {
+        if((char)lookahead != '\uFFFF') {
             fileReader.seek(fileReader.getFilePointer() - 1);
         }
     }
@@ -57,7 +57,7 @@ public class Lexer {
     }
 
 
-    public Token nextToken() throws IOException {
+    public Optional<Token> nextToken() throws IOException {
         state = 1;
         lexeme = "";
         c = '\u0000';
@@ -66,8 +66,8 @@ public class Lexer {
             lookahead = fileReader.read();
             c = (char) lookahead;
             if (state == 1){
-                if (c == '\0'){
-                    return new Token(Tag.EOF.toString(), "EOF", n_line, n_column);
+                if (c == '\uFFFF'){
+                    return Optional.of(new Token(Tag.EOF.toString(), "EOF", n_line, n_column));
                 }
                 else if (c == ' ' || c == '\t' || c == '\n' || c == '\r'){
                     state = 1;
@@ -127,9 +127,12 @@ public class Lexer {
                 }
                 else{
                     lexicError("Caractere invalido [" + c + "] na linha " + n_line + " e coluna " + n_column);
+                    return Optional.empty();
                 }
-                return null;
+
             }
+
+
             else if(state == 2){
                 if (Character.isAlphabetic(c) || Character.isDigit(c) || c == '_'){
                     lexeme += c;
@@ -139,7 +142,7 @@ public class Lexer {
                     if(token.isEmpty()){
                         Token newToken = new Token(Tag.ID.toString(), lexeme, n_line, n_column);
                         st.addToken(lexeme, newToken);
-                        return newToken;
+                        return Optional.of(newToken);
                     }
                 }
             }
