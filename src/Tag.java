@@ -29,7 +29,7 @@ public enum Tag {
     OP_DIVISAO,
 
     OP_MAIOR,
-    OP_MAIOR_IGUAU,
+    OP_MAIOR_IGUAL,
     OP_MENOR,
     OP_MENOR_IGUAL,
     OP_IGUAL,

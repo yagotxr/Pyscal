@@ -1,2 +1,7 @@
 yago #oi gente bla
 10
+carol carol
+<
+<=
+>
+>=

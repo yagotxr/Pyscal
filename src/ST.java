@@ -35,7 +35,7 @@ public class ST {
         this.simbolTable.put("/", new Token(Tag.OP_DIVISAO.toString(), "/", 0, 0));
 
         this.simbolTable.put(">", new Token(Tag.OP_MAIOR.toString(), ">", 0, 0));
-        this.simbolTable.put(">=", new Token(Tag.OP_MAIOR_IGUAU.toString(), ">=", 0, 0));
+        this.simbolTable.put(">=", new Token(Tag.OP_MAIOR_IGUAL.toString(), ">=", 0, 0));
         this.simbolTable.put("<", new Token(Tag.OP_MENOR.toString(), "<", 0, 0));
         this.simbolTable.put("<=", new Token(Tag.OP_MENOR_IGUAL.toString(), "<=", 0, 0));
         this.simbolTable.put("==", new Token(Tag.OP_IGUAL.toString(), "==", 0, 0));
