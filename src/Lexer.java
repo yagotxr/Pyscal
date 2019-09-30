@@ -71,7 +71,6 @@ public class Lexer {
                     return Optional.of(new Token(Tag.EOF.toString(), "EOF", n_line, n_column));
                 } else if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
                     state = 1;
-                    System.out.println(state);
                 } else if (Character.isAlphabetic(c)) {
                     state = 2;
                     lexeme += c;
@@ -183,9 +182,13 @@ public class Lexer {
 
         else if(state == 11){
             if(c == '\n'){
+                state = 1;
+            }
+            }
 
-            }
-            }
+///[STATE 12]///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
         }
     }
