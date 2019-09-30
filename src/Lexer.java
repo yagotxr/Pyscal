@@ -41,7 +41,8 @@ public class Lexer {
         }
     }
 
-    public void lexicError(String message){
+    public void lexicError(){
+        String message = "Caractere invalido [" + c + "] na linha " + n_line + " e coluna " + n_column;
         System.out.println("[Erro Lexico]: " +  message + "\n");
     }
 
@@ -62,102 +63,142 @@ public class Lexer {
         lexeme = "";
         c = '\u0000';
 
-        while (true){
+        while (true) {
             lookahead = fileReader.read();
             c = (char) lookahead;
-            if (state == 1){
-                if (c == '\uFFFF'){
+            if (state == 1) {
+                if (c == '\uFFFF') {
                     return Optional.of(new Token(Tag.EOF.toString(), "EOF", n_line, n_column));
-                }
-                else if (c == ' ' || c == '\t' || c == '\n' || c == '\r'){
+                } else if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
                     state = 1;
                     System.out.println(state);
-                }
-                else if(Character.isAlphabetic(c)){
-                    state = 2;                    System.out.println(state);
+                } else if (Character.isAlphabetic(c)) {
+                    state = 2;
                     lexeme += c;
-                }
-                else if(Character.isDigit(c)){
-                    state = 4;                    System.out.println(state);
+                } else if (Character.isDigit(c)) {
+                    state = 4;
                     lexeme += c;
-                }
-                else if(c == '\"'){
-                    state = 9;                    System.out.println(state);
-                }
-                else if(c == '#'){
-                    state = 11;                    System.out.println(state);
-                }
-                else if(c == '<'){
-                    state = 12;                    System.out.println(state);
-                }
-                else if(c == '>'){
-                    state = 15;                    System.out.println(state);
-                }
-                else if(c == '='){
-                    state = 18;                    System.out.println(state);
-                }
-                else if(c == '!'){
-                    state = 20;                    System.out.println(state);
-                }
-                else if(c == '/'){
-                    state = 23;                    System.out.println(state);
-                }
-                else if(c == '*'){
-                    state = 24;                    System.out.println(state);
-                }
-                else if(c == '+'){
-                    state = 25;                    System.out.println(state);
-                }
-                else if(c == '-'){
-                    state = 26;                    System.out.println(state);
-                }
-                else{
-                    lexicError("Caractere invalido [" + c + "] na linha " + n_line + " e coluna " + n_column);
+                } else if (c == '"') {
+                    state = 9;
+                    lexeme += c;
+                } else if (c == '#') {
+                    state = 11;
+                } else if (c == '<') {
+                    state = 12;
+                } else if (c == '>') {
+                    state = 15;
+                } else if (c == '=') {
+                    state = 18;
+                } else if (c == '!') {
+                    state = 20;
+                } else if (c == '/') {
+                    state = 23;
+                } else if (c == '*') {
+                    state = 24;
+                } else if (c == '-') {
+                    state = 25;
+                } else if (c == '+') {
+                    state = 26;
+                } else if (c == ',') {
+                    state = 27;
+                } else if (c == '[') {
+                    state = 28;
+                } else if (c == ']') {
+                    state = 29;
+                } else if (c == '(') {
+                    state = 30;
+                } else if (c == ')') {
+                    state = 31;
+                } else if (c == '.') {
+                    state = 32;
+                } else if (c == ';') {
+                    state = 33;
+                } else if (c == ':') {
+                    state = 34;
+                } else {
+                    lexicError();
                     return Optional.empty();
                 }
             }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///[STATE 2]///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            else if(state == 2){
-                if (Character.isAlphabetic(c) || Character.isDigit(c) || c == '_'){
+            else if (state == 2) {
+                if (Character.isAlphabetic(c) || Character.isDigit(c) || c == '_') {
                     lexeme += c;
-                } else {
-                    createToken(lexeme, Tag.ID, n_line, n_column);
-                    }
-                }
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            else if(state == 4){
-                if(Character.isDigit(c)){
-                    lexeme += c;
-                }
-                else if(c == '.'){
-                    state = 6;
-                }
-                else {
+                } else {  //[STATE 3]
                     returnPointer();
-
+                    return createToken(lexeme, Tag.ID, n_line, n_column);
                 }
             }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///[STATE 4]///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            else if (state == 4) {
+                if (Character.isDigit(c)) {
+                    lexeme += c;
+                } else if (c == '.') {
+                    state = 6;
+                    lexeme += c;
+                } else { //[STATE 5]
+                    returnPointer();
+                    return createToken(lexeme, Tag.CONSTINT, n_line, n_column);
+                }
+            }
+
+///[STATE 6]///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            else if (state == 6) {
+                if (Character.isDigit(c)) {
+                    state = 7;
+                    lexeme += c;
+                } else {
+                    lexicError();
+                    return Optional.empty();
+                }
+            }
+
+///[STATE 7]///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            else if (state == 7) {
+                if (Character.isDigit(c)) {
+                    lexeme += c;
+                } else { //[STATE 8]
+                    returnPointer();
+                    return createToken(lexeme, Tag.CONSTDOUBLE, n_line, n_column);
+                }
+            }
+///[STATE 9]///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+       else if(state == 9) {
+                if (c != '"') {
+                    lexeme += c;
+                } else { //[STATE 10]
+                    lexeme += c;
+                    return createToken(lexeme, Tag.CONSTSTRING, n_line, n_column);
+                }
+            }
+
+///[STATE 11]///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        else if(state == 11){
+            if(c == '\n'){
+
+            }
+            }
 
         }
-
     }
+        public Optional<Token> createToken (String lexeme, Tag tag,int n_line, int n_column) throws IOException {
+            token = st.getToken(lexeme);
+            if (token.isEmpty()) {
+                Token newToken = new Token(tag.toString(), lexeme, n_line, n_column);
+                st.addToken(lexeme, newToken);
+                return Optional.of(newToken);
+            }
+            return Optional.empty();
+        }
 
-    public Optional<Token> createToken(String lexeme, Tag tag, int n_line, int n_column) throws IOException {
-        returnPointer();
-        token = st.getToken(lexeme);
-        if(token.isEmpty()){
-            Token newToken = new Token(tag.toString(), lexeme, n_line, n_column);
-            st.addToken(lexeme, newToken);
-            return Optional.of(newToken);
-    }
-        return Optional.empty();
-}
 
 
 

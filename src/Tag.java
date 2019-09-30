@@ -40,6 +40,9 @@ public enum Tag {
 
     ID,
     NUM,
+    CONSTINT,
+    CONSTSTRING,
+    CONSTDOUBLE,
 
     PONTO, // .
     DOIS_PONTOS, // :
