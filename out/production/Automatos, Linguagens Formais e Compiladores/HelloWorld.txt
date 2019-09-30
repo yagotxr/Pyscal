@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 yago #oi gente bla
 10
 carol carol
@@ -5,3 +6,6 @@ carol carol
 <=
 >
 >=
+yago, #oi gente bla
+10
+

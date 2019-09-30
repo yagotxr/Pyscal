@@ -6,8 +6,8 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        //final String FILE_PATH = "/Users/yagohenrique/Google Drive/College/6º Periodo/Automatos, Linguagens Formais e Compiladores/src/HelloWorld.txt";
-        final String FILE_PATH = "/home/carolinne/Pyscal/src/HelloWorld.txt";
+        final String FILE_PATH = "/Users/yagohenrique/Google Drive/College/6º Periodo/Automatos, Linguagens Formais e Compiladores/src/HelloWorld.txt";
+//        final String FILE_PATH = "/home/carolinne/Pyscal/src/HelloWorld.txt";
         File file = new File(FILE_PATH);
         Lexer lexer = new Lexer(file);
         Optional<Token> token;
