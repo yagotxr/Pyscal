@@ -1,18 +1,19 @@
+package Lexer;
+
 import java.io.*;
 import java.util.Optional;
 
 public class Lexer {
 
     private ST st;
-    //    private FileReader fileReader;
-    RandomAccessFile fileReader;
+    private RandomAccessFile fileReader;
+    private StringBuilder builder;
     private int lookahead;
-    private int n_line;
-    private int n_column;
+    private long n_line;
+    private long n_column;
     private int state;
     private String lexeme;
     private char c;
-    private Optional<Token> token;
 
     public Lexer(File file) {
         try {
@@ -25,7 +26,8 @@ public class Lexer {
             lexeme = "";
             c = '\u0000';
         } catch (IOException ioException) {
-            System.out.println("Erro de abertura do arquivo. Encerrando.");
+            System.out.println("Erro de abertura do arquivo." +
+                    "\nVerifique novamente o caminho do arquivo.");
             System.exit(0);
         }
     }
@@ -41,13 +43,13 @@ public class Lexer {
         }
     }
 
-    public void lexicError() {
+    private void lexicError() {
         String message = "Caractere invalido [" + c + "] na linha " + n_line + " e coluna " + n_column;
         System.out.println("[Erro Lexico]: " + message + "\n");
     }
 
 
-    public void returnPointer() throws IOException {
+    private void returnPointer() throws IOException {
         if ((char) lookahead != '\uFFFF') {
             fileReader.seek(fileReader.getFilePointer() - 1);
         }
@@ -63,16 +65,17 @@ public class Lexer {
         lexeme = "";
         c = '\u0000';
 
-        while (true) {
+            while (true) {
             lookahead = fileReader.read();
             c = (char) lookahead;
-            if (state == 1) {
+            if (1 == state) {
                 if (c == '\uFFFF') {
                     return Optional.of(new Token(Tag.EOF.toString(), "EOF", n_line, n_column));
                 } else if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
                     state = 1;
-                } else if (Character.isAlphabetic(c)) {
+                } else if (Character.isLetter(c)) {
                     state = 2;
+
                     lexeme += c;
                 } else if (Character.isDigit(c)) {
                     state = 4;
@@ -90,37 +93,58 @@ public class Lexer {
                     lexeme += c;
                 } else if (c == '=') {
                     state = 18;
+                    lexeme += c;
                 } else if (c == '!') {
                     state = 20;
+                    lexeme += c;
                 } else if (c == '/') {
-                    state = 23;
+                    lexeme += c;
+                    //[STATE 23]
+                    return createToken(lexeme, Tag.OP_DIVISAO, n_line, n_column);
                 } else if (c == '*') {
-                    state = 24;
+                    lexeme += c;
+                    //[STATE 24]
+                    return createToken(lexeme, Tag.OP_MULTIPLICACAO, n_line, n_column);
                 } else if (c == '-') {
-                    state = 25;
+                    lexeme += c;
+                    //[STATE 25]
+                    return createToken(lexeme, Tag.OP_SUBTRACAO, n_line, n_column);
                 } else if (c == '+') {
-                    state = 26;
+                    lexeme += c;
+                    //[STATE 26]
+                    return createToken(lexeme, Tag.OP_SOMA, n_line, n_column);
                 } else if (c == ',') {
-                    state = 27;
                     lexeme += c;
+                    //[STATE 27]
+                    return createToken(lexeme, Tag.VIRGULA, n_line, n_column);
                 } else if (c == '[') {
-                    state = 28;
                     lexeme += c;
+                    //[STATE 28]
+                    return createToken(lexeme, Tag.A_COLCHETE, n_line, n_column);
                 } else if (c == ']') {
-                    state = 29;
                     lexeme += c;
+                    //[STATE 29]
+                    return createToken(lexeme, Tag.F_COLCHETE, n_line, n_column);
                 } else if (c == '(') {
-                    state = 30;
                     lexeme += c;
+                    //[STATE 30]
+                    return createToken(lexeme, Tag.A_PARENTESES, n_line, n_column);
                 } else if (c == ')') {
-                    state = 31;
                     lexeme += c;
+                    //[STATE 31]
+                    return createToken(lexeme, Tag.F_PARENTESES, n_line, n_column);
                 } else if (c == '.') {
-                    state = 32;
+                    lexeme += c;
+                    //[STATE 32]
+                    return createToken(lexeme, Tag.PONTO, n_line, n_column);
                 } else if (c == ';') {
-                    state = 33;
+                    lexeme += c;
+                    //[STATE 33]
+                    return createToken(lexeme, Tag.PONTO_VIRGULA, n_line, n_column);
                 } else if (c == ':') {
-                    state = 34;
+                    lexeme += c;
+                    //[STATE 34]
+                    return createToken(lexeme, Tag.DOIS_PONTOS, n_line, n_column);
                 } else {
                     lexicError();
                     return Optional.empty();
@@ -130,7 +154,7 @@ public class Lexer {
 ///[STATE 2]///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             else if (state == 2) {
-                if (Character.isAlphabetic(c) || Character.isDigit(c) || c == '_') {
+                if (Character.isLetterOrDigit(c) || c == '_') {
                     lexeme += c;
                 } else {  //[STATE 3]
                     returnPointer();
@@ -174,6 +198,7 @@ public class Lexer {
                     return createToken(lexeme, Tag.CONSTDOUBLE, n_line, n_column);
                 }
             }
+
 ///[STATE 9]///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             else if (state == 9) {
@@ -192,6 +217,7 @@ public class Lexer {
                     state = 1;
                 }
             }
+
 ///[STATE 12]///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             else if (state == 12) {
@@ -203,6 +229,7 @@ public class Lexer {
                     return createToken(lexeme, Tag.OP_MENOR, n_line, n_column);
                 }
             }
+
 ///[STATE 15]///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             else if (state == 15) {
@@ -215,41 +242,36 @@ public class Lexer {
                 }
             }
 
+///[STATE 18]///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-///[STATE 27]///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            else if (state == 27) {
-                return createToken(lexeme, Tag.VIRGULA, n_line, n_column);
+            else if(state == 18){
+                if(c == '='){
+                    state = 19;
+                    lexeme += c;
+                    return createToken(lexeme, Tag.OP_COMPARACAO, n_line, n_column);
+                } else { //[STATE 38]
+                    returnPointer();
+                    return createToken(lexeme, Tag.OP_IGUAL, n_line, n_column);
+                }
             }
+///[STATE 20]///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-///[STATE 28]///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            else if (state == 28) {
-                return createToken(lexeme, Tag.A_COLCHETE, n_line, n_column);
+            else if(state == 20){
+                if(c == '='){
+                    state=22;//[STATE 19]
+                    lexeme += c;
+                    return createToken(lexeme, Tag.OP_DIFERENTE, n_line, n_column);
+                }else{ //[STATE 21]
+                    return createToken(lexeme, Tag.OP_IGUAL, n_line, n_column);
+                }
             }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        }//end while
+    } // end nextToken()
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-///[STATE 29]///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            else if (state == 29){
-                return createToken(lexeme, Tag.F_COLCHETE, n_line, n_column);
-            }
-
-///[STATE 30]///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            else if (state == 30){
-                return createToken(lexeme, Tag.A_PARENTESES, n_line, n_column);
-            }
-
-///[STATE 31]///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-        }
-    }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public Optional<Token> createToken(String lexeme, Tag tag, int n_line, int n_column) throws IOException {
-        token = st.getToken(lexeme);
+    private Optional<Token> createToken(String lexeme, Tag tag, long n_line, long n_column) throws IOException {
+        Optional<Token> token = st.getToken(lexeme);
         if (token.isEmpty()) {
             Token newToken = new Token(tag.toString(), lexeme, n_line, n_column);
             st.addToken(lexeme, newToken);
@@ -257,6 +279,11 @@ public class Lexer {
         }
         return token;
     }
+
+    public void setN_line(){
+        this.n_line++;
+    }
+
 }
 
 

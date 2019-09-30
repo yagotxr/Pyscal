@@ -1,6 +1,11 @@
+import Lexer.Lexer;
+import Lexer.Token;
+import Lexer.Tag;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
+
+
 
 public class Main {
 
@@ -8,6 +13,7 @@ public class Main {
 
         final String FILE_PATH = "/Users/yagohenrique/Google Drive/College/6º Periodo/Automatos, Linguagens Formais e Compiladores/src/HelloWorld.txt";
 //        final String FILE_PATH = "/home/carolinne/Pyscal/src/HelloWorld.txt";
+
         File file = new File(FILE_PATH);
         Lexer lexer = new Lexer(file);
         Optional<Token> token;

@@ -1,3 +1,5 @@
+package Lexer;
+
 public enum Tag {
 
     EOF,
@@ -34,12 +36,12 @@ public enum Tag {
     OP_MENOR_IGUAL,
     OP_IGUAL,
     OP_DIFERENTE,
+    OP_COMPARACAO,
 
     OPUNARIO_NEGACAO,
     OPUNARIO_NEGATIVO,
 
     ID,
-    NUM,
     CONSTINT,
     CONSTSTRING,
     CONSTDOUBLE,

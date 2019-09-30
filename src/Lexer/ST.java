@@ -1,3 +1,5 @@
+package Lexer;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -33,13 +35,14 @@ public class ST {
         this.simbolTable.put("-", new Token(Tag.OP_SUBTRACAO.toString(), "-", 0, 0));
         this.simbolTable.put("*", new Token(Tag.OP_MULTIPLICACAO.toString(), "*", 0, 0));
         this.simbolTable.put("/", new Token(Tag.OP_DIVISAO.toString(), "/", 0, 0));
+        this.simbolTable.put("=", new Token(Tag.OP_IGUAL.toString(), "=", 0, 0));
 
         this.simbolTable.put(">", new Token(Tag.OP_MAIOR.toString(), ">", 0, 0));
         this.simbolTable.put(">=", new Token(Tag.OP_MAIOR_IGUAL.toString(), ">=", 0, 0));
         this.simbolTable.put("<", new Token(Tag.OP_MENOR.toString(), "<", 0, 0));
         this.simbolTable.put("<=", new Token(Tag.OP_MENOR_IGUAL.toString(), "<=", 0, 0));
-        this.simbolTable.put("==", new Token(Tag.OP_IGUAL.toString(), "==", 0, 0));
         this.simbolTable.put("!=", new Token(Tag.OP_DIFERENTE.toString(), "!=", 0, 0));
+        this.simbolTable.put("==", new Token(Tag.OP_COMPARACAO.toString(), "==", 0, 0));
 
         this.simbolTable.put("!", new Token(Tag.OPUNARIO_NEGACAO.toString(), "!", 0, 0));
         this.simbolTable.put("-", new Token(Tag.OPUNARIO_NEGATIVO.toString(), "-", 0, 0));

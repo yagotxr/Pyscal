@@ -1,9 +1,11 @@
+package Lexer;
+
 public class Token {
 
     private String name, lexeme;
-    private  int line = 0, column = 0;
+    private  long line, column;
 
-    public Token(String name, String lexeme, int line, int column) {
+    public Token(String name, String lexeme, long line, long column) {
         this.name = name;
         this.lexeme = lexeme;
         this.line = line;
@@ -22,11 +24,11 @@ public class Token {
         return lexeme;
     }
 
-    public int getLine() {
+    public long getLine() {
         return line;
     }
 
-    public int getColumn() {
+    public long getColumn() {
         return column;
     }
 }

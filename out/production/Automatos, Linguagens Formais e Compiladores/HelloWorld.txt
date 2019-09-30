@@ -1,11 +1,16 @@
-<<<<<<< Updated upstream
-yago #oi gente bla
-10
-carol carol
-<
-<=
->
->=
-yago, #oi gente bla
-10
+def void main (String[] args0):
+    String name = "Yago";
+    integer age = 22;
+    bool hasJob = true;
+    String lastName = "Teixeira";
 
+# This document only test the Lexic Analisor!! :p
+
+    def void getAge():
+        print(age);
+
+    def void olderThan18():
+        if age >= 18:
+            print(name + " is older than 18!")
+
+%
