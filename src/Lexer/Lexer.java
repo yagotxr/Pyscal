@@ -82,7 +82,6 @@ public class Lexer {
                     lexeme += c;
                 } else if (c == '"') {
                     state = 9;
-                    lexeme += c;
                 } else if (c == '#') {
                     state = 11;
                 } else if (c == '<') {
@@ -204,8 +203,8 @@ public class Lexer {
             else if (state == 9) {
                 if (c != '"') {
                     lexeme += c;
-                } else { //[STATE 10]
-                    lexeme += c;
+                }
+                else { //[STATE 10]
                     return createToken(lexeme, Tag.CONSTSTRING, n_line, n_column);
                 }
             }
