@@ -23,7 +23,10 @@ public enum Tag {
     KW_IF,
     KW_ELSE,
     KW_WHILE,
-    KW_WRITE ,
+    KW_WRITE,
+
+    OP_OR,
+    OP_AND,
 
     OP_SOMA,
     OP_SUBTRACAO,

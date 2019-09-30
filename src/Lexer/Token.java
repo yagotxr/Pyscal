@@ -31,4 +31,12 @@ public class Token {
     public long getColumn() {
         return column;
     }
+
+    public void setLine(long line) {
+        this.line = line;
+    }
+
+    public void setColumn(long column) {
+        this.column = column;
+    }
 }

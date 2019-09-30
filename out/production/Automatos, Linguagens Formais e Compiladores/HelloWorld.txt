@@ -1,14 +1,16 @@
-def void main (String[] args0):
-    String name = "Yago";
-    integer age = 22;
-    bool hasJob = true;
-    String lastName = "Teixeira";
+class Pressao:
+    def bool podeEntregarDepois():
+        return false{
+    end;
 
-# This document only test the Lexic Analisor!! :p
+    defstatic void main(String[] args):
+        write("Caros alunos de Compiladores");
+        write("");
+        write("Este eh um codigo de exemplo em Pyscal!");
+        write("");
 
-    def void getAge():
-        print(age);
-
-    def void olderThan18():
-        if age >= 18:
-            print(name + " is older than 18!")
+        if(podeEntregarDepois()):
+            writeln("Pode, mas nao tem ponto.");
+        end;
+    end;
+end.

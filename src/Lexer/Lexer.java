@@ -9,8 +9,9 @@ public class Lexer {
     private RandomAccessFile fileReader;
     private StringBuilder builder;
     private int lookahead;
-    private long n_line;
-    private long n_column;
+    private long line;
+    private long column;
+    long atColumn;
     private int state;
     private String lexeme;
     private char c;
@@ -19,8 +20,8 @@ public class Lexer {
         try {
             fileReader = new RandomAccessFile(file, "r");
             lookahead = 0;
-            n_line = 1;
-            n_column = 1;
+            line = 1;
+            column = 0;
             st = new ST();
             state = 1;
             lexeme = "";
@@ -43,14 +44,19 @@ public class Lexer {
         }
     }
 
-    private void lexicError() {
-        String message = "Caractere invalido [" + c + "] na linha " + n_line + " e coluna " + n_column;
+//    private void lexicError() {
+//        String message = "Caractere invalido [" + c + "] na linha " + line + " e coluna " + column;
+//        System.out.println("[Erro Lexico]: " + message + "\n");
+//    }
+
+    private void lexicError(String message) {
         System.out.println("[Erro Lexico]: " + message + "\n");
     }
 
 
     private void returnPointer() throws IOException {
         if ((char) lookahead != '\uFFFF') {
+            column--;
             fileReader.seek(fileReader.getFilePointer() - 1);
         }
     }
@@ -68,84 +74,103 @@ public class Lexer {
             while (true) {
             lookahead = fileReader.read();
             c = (char) lookahead;
+            updateLineAndColumn(c);
             if (1 == state) {
                 if (c == '\uFFFF') {
-                    return Optional.of(new Token(Tag.EOF.toString(), "EOF", n_line, n_column));
+                    return Optional.of(new Token(Tag.EOF.toString(), "EOF", line, column));
                 } else if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
                     state = 1;
                 } else if (Character.isLetter(c)) {
                     state = 2;
-
+                    atColumn = column;
                     lexeme += c;
                 } else if (Character.isDigit(c)) {
                     state = 4;
                     lexeme += c;
+                    atColumn = column;
                 } else if (c == '"') {
                     state = 9;
+                    atColumn = column;
                 } else if (c == '#') {
                     state = 11;
                 } else if (c == '<') {
                     state = 12;
                     lexeme += c;
+                    atColumn = column;
                 } else if (c == '>') {
                     state = 15;
                     lexeme += c;
+                    atColumn = column;
                 } else if (c == '=') {
                     state = 18;
                     lexeme += c;
+                    atColumn = column;
                 } else if (c == '!') {
                     state = 20;
                     lexeme += c;
+                    atColumn = column;
                 } else if (c == '/') {
                     lexeme += c;
+                    atColumn = column;
                     //[STATE 23]
-                    return createToken(lexeme, Tag.OP_DIVISAO, n_line, n_column);
+                    return returnToken(lexeme, Tag.OP_DIVISAO, line, atColumn);
                 } else if (c == '*') {
                     lexeme += c;
+                    atColumn = column;
                     //[STATE 24]
-                    return createToken(lexeme, Tag.OP_MULTIPLICACAO, n_line, n_column);
+                    return returnToken(lexeme, Tag.OP_MULTIPLICACAO, line, atColumn);
                 } else if (c == '-') {
                     lexeme += c;
+                    atColumn = column;
                     //[STATE 25]
-                    return createToken(lexeme, Tag.OP_SUBTRACAO, n_line, n_column);
+                    return returnToken(lexeme, Tag.OP_SUBTRACAO, line, atColumn);
                 } else if (c == '+') {
                     lexeme += c;
+                    atColumn = column;
                     //[STATE 26]
-                    return createToken(lexeme, Tag.OP_SOMA, n_line, n_column);
+                    return returnToken(lexeme, Tag.OP_SOMA, line, atColumn);
                 } else if (c == ',') {
                     lexeme += c;
+                    atColumn = column;
                     //[STATE 27]
-                    return createToken(lexeme, Tag.VIRGULA, n_line, n_column);
+                    return returnToken(lexeme, Tag.VIRGULA, line, atColumn);
                 } else if (c == '[') {
                     lexeme += c;
+                    atColumn = column;
                     //[STATE 28]
-                    return createToken(lexeme, Tag.A_COLCHETE, n_line, n_column);
+                    return returnToken(lexeme, Tag.A_COLCHETE, line, atColumn);
                 } else if (c == ']') {
                     lexeme += c;
+                    atColumn = column;
                     //[STATE 29]
-                    return createToken(lexeme, Tag.F_COLCHETE, n_line, n_column);
+                    return returnToken(lexeme, Tag.F_COLCHETE, line, atColumn);
                 } else if (c == '(') {
                     lexeme += c;
+                    atColumn = column;
                     //[STATE 30]
-                    return createToken(lexeme, Tag.A_PARENTESES, n_line, n_column);
+                    return returnToken(lexeme, Tag.A_PARENTESES, line, atColumn);
                 } else if (c == ')') {
                     lexeme += c;
+                    atColumn = column;
                     //[STATE 31]
-                    return createToken(lexeme, Tag.F_PARENTESES, n_line, n_column);
+                    return returnToken(lexeme, Tag.F_PARENTESES, line, atColumn);
                 } else if (c == '.') {
                     lexeme += c;
+                    atColumn = column;
                     //[STATE 32]
-                    return createToken(lexeme, Tag.PONTO, n_line, n_column);
+                    return returnToken(lexeme, Tag.PONTO, line, atColumn);
                 } else if (c == ';') {
                     lexeme += c;
+                    atColumn = column;
                     //[STATE 33]
-                    return createToken(lexeme, Tag.PONTO_VIRGULA, n_line, n_column);
+                    return returnToken(lexeme, Tag.PONTO_VIRGULA, line, atColumn);
                 } else if (c == ':') {
                     lexeme += c;
+                    atColumn = column;
                     //[STATE 34]
-                    return createToken(lexeme, Tag.DOIS_PONTOS, n_line, n_column);
+                    return returnToken(lexeme, Tag.DOIS_PONTOS, line, atColumn);
                 } else {
-                    lexicError();
+                    lexicError("Error:(" + line + "," + atColumn + ") Invalid token");
                     return Optional.empty();
                 }
             }
@@ -157,7 +182,7 @@ public class Lexer {
                     lexeme += c;
                 } else {  //[STATE 3]
                     returnPointer();
-                    return createToken(lexeme, Tag.ID, n_line, n_column);
+                    return createToken(lexeme, Tag.ID, line, atColumn);
                 }
             }
 
@@ -171,7 +196,7 @@ public class Lexer {
                     lexeme += c;
                 } else { //[STATE 5]
                     returnPointer();
-                    return createToken(lexeme, Tag.CONSTINT, n_line, n_column);
+                    return createToken(lexeme, Tag.CONSTINT, line, atColumn);
                 }
             }
 
@@ -182,7 +207,7 @@ public class Lexer {
                     state = 7;
                     lexeme += c;
                 } else {
-                    lexicError();
+                    lexicError("Error:(" + line + atColumn + ") Caracter inválido [" + c + "]");
                     return Optional.empty();
                 }
             }
@@ -194,18 +219,22 @@ public class Lexer {
                     lexeme += c;
                 } else { //[STATE 8]
                     returnPointer();
-                    return createToken(lexeme, Tag.CONSTDOUBLE, n_line, n_column);
+                    return createToken(lexeme, Tag.CONSTDOUBLE, line, atColumn);
                 }
             }
 
 ///[STATE 9]///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             else if (state == 9) {
-                if (c != '"') {
+                if(c == '\n'){
+                    lexicError("Unclosed string literal");
+                    return Optional.empty();
+                }
+                else if (c != '"') {
                     lexeme += c;
                 }
                 else { //[STATE 10]
-                    return createToken(lexeme, Tag.CONSTSTRING, n_line, n_column);
+                    return createToken(lexeme, Tag.CONSTSTRING, line, atColumn);
                 }
             }
 
@@ -223,9 +252,9 @@ public class Lexer {
                 if (c == '=') {
                     state = 13; //[STATE 13]
                     lexeme += c;
-                    return createToken(lexeme, Tag.OP_MENOR_IGUAL, n_line, n_column);
+                    return returnToken(lexeme, Tag.OP_MENOR_IGUAL, line, atColumn);
                 } else { //[STATE 14]
-                    return createToken(lexeme, Tag.OP_MENOR, n_line, n_column);
+                    return returnToken(lexeme, Tag.OP_MENOR, line, atColumn);
                 }
             }
 
@@ -235,9 +264,9 @@ public class Lexer {
                 if (c == '=') {
                     state = 16;//[STATE 16]
                     lexeme += c;
-                    return createToken(lexeme, Tag.OP_MAIOR_IGUAL, n_line, n_column);
+                    return returnToken(lexeme, Tag.OP_MAIOR_IGUAL, line, atColumn);
                 } else { //[STATE 17]
-                    return createToken(lexeme, Tag.OP_MAIOR, n_line, n_column);
+                    return returnToken(lexeme, Tag.OP_MAIOR, line, atColumn);
                 }
             }
 
@@ -247,10 +276,10 @@ public class Lexer {
                 if(c == '='){
                     state = 19;
                     lexeme += c;
-                    return createToken(lexeme, Tag.OP_COMPARACAO, n_line, n_column);
+                    return returnToken(lexeme, Tag.OP_COMPARACAO, line, atColumn);
                 } else { //[STATE 38]
                     returnPointer();
-                    return createToken(lexeme, Tag.OP_IGUAL, n_line, n_column);
+                    return returnToken(lexeme, Tag.OP_IGUAL, line, atColumn);
                 }
             }
 ///[STATE 20]///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -259,9 +288,9 @@ public class Lexer {
                 if(c == '='){
                     state=22;//[STATE 19]
                     lexeme += c;
-                    return createToken(lexeme, Tag.OP_DIFERENTE, n_line, n_column);
+                    return returnToken(lexeme, Tag.OP_DIFERENTE, line, atColumn);
                 }else{ //[STATE 21]
-                    return createToken(lexeme, Tag.OP_IGUAL, n_line, n_column);
+                    return returnToken(lexeme, Tag.OP_IGUAL, line, atColumn);
                 }
             }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -271,16 +300,31 @@ public class Lexer {
 
     private Optional<Token> createToken(String lexeme, Tag tag, long n_line, long n_column) throws IOException {
         Optional<Token> token = st.getToken(lexeme);
-        if (token.isEmpty()) {
+        if(token.isPresent()){
+            token.get().setColumn(n_column);
+            token.get().setLine(n_line);
+            return token;
+        } else {
             Token newToken = new Token(tag.toString(), lexeme, n_line, n_column);
             st.addToken(lexeme, newToken);
             return Optional.of(newToken);
         }
-        return token;
+
     }
 
-    public void setN_line(){
-        this.n_line++;
+    private Optional<Token> returnToken(String lexeme, Tag tag, long n_line, long n_column){
+        return Optional.of(new Token(tag.toString(), lexeme, n_line, n_column));
+    }
+
+    public void updateLineAndColumn(char c){
+        if(c == '\n'){
+            line++;
+            column = -1;
+        } if(c == '\t'){
+            column += 5;
+        } else {
+            column++;
+        }
     }
 
 }
