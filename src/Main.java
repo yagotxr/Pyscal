@@ -11,10 +11,11 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        final String FILE_PATH = "/Users/yagohenrique/Google Drive/College/6º Periodo/Automatos, Linguagens Formais e Compiladores/src/HelloWorld.txt";
-//        final String FILE_PATH = "/home/carolinne/Pyscal/src/HelloWorld.txt";
+        final String FILE_PATH = "/Users/yagohenrique/Google Drive/College/6º Periodo/Automatos, Linguagens Formais e Compiladores/Pyscal/src/";
+//        final String FILE_PATH = "/home/carolinne/Pyscal/src/";
 
-        File file = new File(FILE_PATH);
+        String fileName = "HelloWorld.txt";
+        File file = new File(FILE_PATH + fileName);
         Lexer lexer = new Lexer(file);
         Optional<Token> token;
 

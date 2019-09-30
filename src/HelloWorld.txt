@@ -4,7 +4,7 @@ def void main (String[] args0):
     bool hasJob = true;
     String lastName = "Teixeira";
 
-# This document only test the Lexic Analisor!! :p
+# This document only test the Lexi Analyser!! :p
 
     def void getAge():
         print(age);
