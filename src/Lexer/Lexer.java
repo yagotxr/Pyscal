@@ -15,6 +15,8 @@ public class Lexer {
     private int state;
     private String lexeme;
     private char c;
+    private int nErros;
+
     public Lexer(File file) {
         try {
             fileReader = new RandomAccessFile(file, "r");
@@ -25,6 +27,7 @@ public class Lexer {
             state = 1;
             lexeme = "";
             c = '\u0000';
+            nErros = 0;
         } catch (IOException ioException) {
             System.out.println("Erro de abertura do arquivo." +
                     "\nVerifique novamente o caminho do arquivo.");
@@ -70,7 +73,10 @@ public class Lexer {
         lexeme = "";
         c = '\u0000';
 
-            while (true) {
+        while (true) {
+            if(nErros == 5){
+                return Optional.empty();
+            }
             lookahead = fileReader.read();
             c = (char) lookahead;
             updateLineAndColumn(c);
@@ -121,9 +127,8 @@ public class Lexer {
                 } else if (c == '-') {
                     lexeme += c;
                     atColumn = column;
-                    if(previousIsNumber()){ //Se anterior e número
-                    // [STATE 25]
-                    return returnToken(lexeme, Tag.OP_SUBTRACAO, line, atColumn);
+                    if(previousIsNumber()){// [STATE 25]
+                        return returnToken(lexeme, Tag.OP_SUBTRACAO, line, atColumn);
                     } else {
                         state = 1;
                     }
@@ -173,8 +178,8 @@ public class Lexer {
                     //[STATE 34]
                     return returnToken(lexeme, Tag.DOIS_PONTOS, line, atColumn);
                 } else {
-                    lexicError("Error:(" + line + "," + atColumn + ") Invalid token");
-                    return Optional.empty();
+                    lexicError("Error:(" + line + "," + column + ") Invalid token [" + c + "]");
+                    nErros++;
                 }
             }
 
@@ -209,10 +214,11 @@ public class Lexer {
                 if (Character.isDigit(c)) {
                     state = 7;
                     lexeme += c;
-                } else {
-                    lexicError("Error:(" + line + atColumn + ") Caracter inválido [" + c + "]");
+                }  else {
+                    lexicError("Error:(" + line + "," + column + ") Caracter inválido [" + c + "]");
                     return Optional.empty();
                 }
+//
             }
 
 ///[STATE 7]///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -220,7 +226,7 @@ public class Lexer {
             else if (state == 7) {
                 if (Character.isDigit(c)) {
                     lexeme += c;
-                } else { //[STATE 8]
+                }  else { //[STATE 5]
                     returnPointer();
                     return createToken(lexeme, Tag.CONSTDOUBLE, line, atColumn);
                 }
@@ -231,7 +237,7 @@ public class Lexer {
             else if (state == 9) {
                 if(c == '\n'){
                     lexicError("Unclosed String literal");
-                    return Optional.empty();
+                    nErros++;
                 }
                 else if (c != '"') {
                     lexeme += c;

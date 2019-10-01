@@ -14,6 +14,7 @@ public class Main {
         final String FILE_PATH = "/Users/yagohenrique/Google Drive/College/6º Periodo/Automatos, Linguagens Formais e Compiladores/Pyscal/src/";
 //        final String FILE_PATH = "/home/carolinne/Pyscal/src/";
 
+        double a=0.12;
         String fileName = "HelloWorld.txt";
         File file = new File(FILE_PATH + fileName);
         Lexer lexer = new Lexer(file);

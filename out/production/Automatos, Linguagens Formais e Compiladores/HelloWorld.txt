@@ -4,15 +4,14 @@ class Pressao:
     end;
 
     defstatic void main(String[] args):
-        write("Caros alunos de Compiladores
-        ");
-        write(-     3
-        - 9);
+        write("Caros alunos de Compiladores");
         write("Este eh um codigo de exemplo em Pyscal!");
         write("");
 
         if(podeEntregarDepois()):
-            writeln("Pode, mas nao tem ponto.");
+            write("Pode, mas nao tem ponto.");
+            write(-10.82-10+" pontos");
+
         end;
     end;
 end.
