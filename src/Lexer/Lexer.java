@@ -338,7 +338,7 @@ public class Lexer {
             fileReader.seek(fileReader.getFilePointer() - 2);
             seenChar = (char) fileReader.read();
             while ((seenChar == ' ' || seenChar == '\n' || seenChar == '\t' || seenChar == '\r')) {
-                fileReader.seek(fileReader.getFilePointer() - 1);
+                fileReader.seek(fileReader.getFilePointer() - 2);
                 seenChar = (char) fileReader.read();
             }
         } catch (IOException ioEx) {
