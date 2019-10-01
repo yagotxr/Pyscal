@@ -46,13 +46,8 @@ public class Lexer {
         }
     }
 
-//    private void lexicError() {
-//        String message = "Caractere invalido [" + c + "] na linha " + line + " e coluna " + column;
-//        System.out.println("[Erro Lexico]: " + message + "\n");
-//    }
-
     private void lexicError(String message) {
-        System.out.println("[Erro Lexico]: " + message + "\n");
+        System.out.println("////////////////[Erro Lexico]: " + message + "\n");
     }
 
 
@@ -177,7 +172,7 @@ public class Lexer {
                     atColumn = column;
                     //[STATE 34]
                     return returnToken(lexeme, Tag.DOIS_PONTOS, line, atColumn);
-                } else {
+                } else { //Panico
                     lexicError("Error:(" + line + "," + column + ") Invalid token [" + c + "]");
                     nErros++;
                 }
@@ -216,9 +211,9 @@ public class Lexer {
                     lexeme += c;
                 }  else {
                     lexicError("Error:(" + line + "," + column + ") Caracter inválido [" + c + "]");
-                    return Optional.empty();
+                    nErros++;
+                    return panic();
                 }
-//
             }
 
 ///[STATE 7]///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -238,6 +233,7 @@ public class Lexer {
                 if(c == '\n'){
                     lexicError("Unclosed String literal");
                     nErros++;
+                    return Optional.empty();
                 }
                 else if (c != '"') {
                     lexeme += c;
@@ -306,6 +302,19 @@ public class Lexer {
         }//end while
     } // end nextToken()
 
+    private Optional<Token> panic() throws IOException {
+        if(state == 6){
+            while(!Character.isDigit(c)){
+                c = (char) fileReader.read();
+                if(c == '\uFFFF'){
+                    return Optional.empty();
+                }
+            }
+            lexeme += c;
+            return createToken(lexeme, Tag.OP_IGUAL, line, atColumn);
+        }
+        return Optional.empty();
+    }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -354,6 +363,8 @@ public class Lexer {
         fileReader.seek(pointerLocation);
         return Character.isDigit(seenChar);
     }
+
+
 }
 
 
