@@ -15,7 +15,6 @@ public class Lexer {
     private int state;
     private String lexeme;
     private char c;
-
     public Lexer(File file) {
         try {
             fileReader = new RandomAccessFile(file, "r");
@@ -122,8 +121,12 @@ public class Lexer {
                 } else if (c == '-') {
                     lexeme += c;
                     atColumn = column;
-                    //[STATE 25]
+                    if(previousIsNumber()){ //Se anterior e número
+                    // [STATE 25]
                     return returnToken(lexeme, Tag.OP_SUBTRACAO, line, atColumn);
+                    } else {
+                        state = 1;
+                    }
                 } else if (c == '+') {
                     lexeme += c;
                     atColumn = column;
@@ -296,6 +299,8 @@ public class Lexer {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         }//end while
     } // end nextToken()
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private Optional<Token> createToken(String lexeme, Tag tag, long n_line, long n_column) throws IOException {
@@ -326,7 +331,23 @@ public class Lexer {
             column++;
         }
     }
+    private boolean previousIsNumber() throws IOException {
+        long pointerLocation = fileReader.getFilePointer();
+        char seenChar;
+        try {
+            fileReader.seek(fileReader.getFilePointer() - 2);
+            seenChar = (char) fileReader.read();
+            while ((seenChar == ' ' || seenChar == '\n' || seenChar == '\t' || seenChar == '\r')) {
+                fileReader.seek(fileReader.getFilePointer() - 1);
+                seenChar = (char) fileReader.read();
+            }
+        } catch (IOException ioEx) {
+            return false;
+        }
 
+        fileReader.seek(pointerLocation);
+        return Character.isDigit(seenChar);
+    }
 }
 
 
