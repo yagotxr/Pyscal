@@ -230,7 +230,7 @@ public class Lexer {
 
             else if (state == 9) {
                 if(c == '\n'){
-                    lexicError("Unclosed string literal");
+                    lexicError("Unclosed String literal");
                     return Optional.empty();
                 }
                 else if (c != '"') {

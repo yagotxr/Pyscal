@@ -4,7 +4,8 @@ class Pressao:
     end;
 
     defstatic void main(String[] args):
-        write("Caros alunos de Compiladores");
+        write("Caros alunos de Compiladores
+        ");
         write(-     3
         - 9);
         write("Este eh um codigo de exemplo em Pyscal!");
