@@ -1,4 +1,7 @@
-package Lexer;
+package Lexer.Token;
+
+import Lexer.Lexer;
+import Lexer.Token.Token;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,6 +1,6 @@
 import Lexer.Lexer;
-import Lexer.Token;
-import Lexer.Tag;
+import Lexer.Token.Token;
+import Lexer.Token.Tag;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;

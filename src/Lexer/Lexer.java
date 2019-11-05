@@ -1,5 +1,9 @@
 package Lexer;
 
+import Lexer.Token.ST;
+import Lexer.Token.Tag;
+import Lexer.Token.Token;
+
 import java.io.*;
 import java.util.Optional;
 
@@ -197,7 +201,7 @@ public class Lexer {
                     lexeme += c;
                 } else { //[STATE 5]
                     returnPointer();
-                    return returnToken(lexeme, Tag.CONSTINT, line, atColumn);
+                    return returnToken(lexeme, Tag.CONST_INT, line, atColumn);
                 }
             }
 
@@ -221,7 +225,7 @@ public class Lexer {
                     lexeme += c;
                 }  else { //[STATE 5]
                     returnPointer();
-                    return returnToken(lexeme, Tag.CONSTDOUBLE, line, atColumn);
+                    return returnToken(lexeme, Tag.CONST_DOUBLE, line, atColumn);
                 }
             }
 
@@ -236,7 +240,7 @@ public class Lexer {
                     lexeme += c;
                 }
                 else { //[STATE 10]
-                    return returnToken(lexeme, Tag.CONSTSTRING, line, atColumn);
+                    return returnToken(lexeme, Tag.CONST_STRING, line, atColumn);
                 }
             }
 
@@ -292,7 +296,7 @@ public class Lexer {
                     lexeme += c;
                     return returnToken(lexeme, Tag.OP_DIFERENTE, line, atColumn);
                 }else{ //[STATE 21]
-                    return returnToken(lexeme, Tag.OP_IGUAL, line, atColumn);
+                    return returnToken(lexeme, Tag.OPUNARIO_NEGACAO, line, atColumn);
                 }
             }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

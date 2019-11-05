@@ -1,4 +1,4 @@
-package Lexer;
+package Lexer.Token;
 
 public enum Tag {
 
@@ -45,9 +45,9 @@ public enum Tag {
     OPUNARIO_NEGATIVO,
 
     ID,
-    CONSTINT,
-    CONSTSTRING,
-    CONSTDOUBLE,
+    CONST_INT,
+    CONST_STRING,
+    CONST_DOUBLE,
 
     PONTO, // .
     DOIS_PONTOS, // :
