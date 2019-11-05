@@ -344,7 +344,7 @@ public class Lexer {
                 fileReader.seek(fileReader.getFilePointer() - 2);
                 seenChar = (char) fileReader.read();
             }
-        } catch (IOException ioEx) {
+        } catch (IOException ioEx) { // If pointer gets to the beginning of the file, returns false
             return false;
         }
 
