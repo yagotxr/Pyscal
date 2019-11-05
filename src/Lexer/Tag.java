@@ -53,8 +53,8 @@ public enum Tag {
     DOIS_PONTOS, // :
     PONTO_VIRGULA, //;
     VIRGULA,  // ,
-    A_PARENTESES,  // (
-    F_PARENTESES, // )
-    A_COLCHETE, // [
-    F_COLCHETE, // ]
+    ABRE_PARENTESES,  // (
+    FECHA_PARENTESES, // )
+    ABRE_COLCHETE, // [
+    FECHA_COLCHETE, // ]
 }

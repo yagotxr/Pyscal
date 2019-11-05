@@ -31,34 +31,7 @@ public class ST {
         this.simbolTable.put("while", new Token(Tag.KW_WHILE.toString(), "while", 0, 0));
         this.simbolTable.put("write", new Token(Tag.KW_WRITE.toString(), "write", 0, 0));
         this.simbolTable.put("or", new Token(Tag.OP_OR.toString(), "or", 0, 0));
-        this.simbolTable.put("and", new Token(Tag.OP_OR.toString(), "and", 0, 0));
-
-//        this.simbolTable.put("+", new Token(Tag.OP_SOMA.toString(), "+", 0, 0));
-//        this.simbolTable.put("-", new Token(Tag.OP_SUBTRACAO.toString(), "-", 0, 0));
-//        this.simbolTable.put("*", new Token(Tag.OP_MULTIPLICACAO.toString(), "*", 0, 0));
-//        this.simbolTable.put("/", new Token(Tag.OP_DIVISAO.toString(), "/", 0, 0));
-//        this.simbolTable.put("=", new Token(Tag.OP_IGUAL.toString(), "=", 0, 0));
-//
-//        this.simbolTable.put(">", new Token(Tag.OP_MAIOR.toString(), ">", 0, 0));
-//        this.simbolTable.put(">=", new Token(Tag.OP_MAIOR_IGUAL.toString(), ">=", 0, 0));
-//        this.simbolTable.put("<", new Token(Tag.OP_MENOR.toString(), "<", 0, 0));
-//        this.simbolTable.put("<=", new Token(Tag.OP_MENOR_IGUAL.toString(), "<=", 0, 0));
-//        this.simbolTable.put("!=", new Token(Tag.OP_DIFERENTE.toString(), "!=", 0, 0));
-//        this.simbolTable.put("==", new Token(Tag.OP_COMPARACAO.toString(), "==", 0, 0));
-//
-//        this.simbolTable.put("!", new Token(Tag.OPUNARIO_NEGACAO.toString(), "!", 0, 0));
-//        this.simbolTable.put("-", new Token(Tag.OPUNARIO_NEGATIVO.toString(), "-", 0, 0));
-//
-//        this.simbolTable.put(".", new Token(Tag.PONTO.toString(), ".", 0, 0));
-//        this.simbolTable.put(":", new Token(Tag.DOIS_PONTOS.toString(), ":", 0, 0));
-//        this.simbolTable.put(";", new Token(Tag.PONTO_VIRGULA.toString(), ";", 0, 0));
-//        this.simbolTable.put(",", new Token(Tag.VIRGULA.toString(), ",", 0, 0));
-//
-//        this.simbolTable.put("(", new Token(Tag.A_PARENTESES.toString(), "(", 0,0));
-//        this.simbolTable.put(")", new Token(Tag.F_PARENTESES.toString(), ")", 0,0));
-//
-//        this.simbolTable.put("[", new Token(Tag.A_COLCHETE.toString(), "[", 0,0));
-//        this.simbolTable.put("]", new Token(Tag.F_COLCHETE.toString(), "]", 0,0));
+        this.simbolTable.put("and", new Token(Tag.OP_AND.toString(), "and", 0, 0));
     }
 
     public Optional<Token> getToken(String lexema){
@@ -74,8 +47,6 @@ public class ST {
     }
 
     public void printST(){
-        simbolTable.entrySet().forEach(entry->{
-            System.out.println(entry.getKey() + " : " + entry.getValue().toString());
-        });
+        simbolTable.forEach((key, value) -> System.out.println(key + " : " + value.toString()));
     }
 }

@@ -7,7 +7,6 @@ public class Lexer {
 
     private ST st;
     private RandomAccessFile fileReader;
-    private StringBuilder builder;
     private int lookahead;
     private long line;
     private long column;
@@ -46,15 +45,9 @@ public class Lexer {
         }
     }
 
-//    private void lexicError() {
-//        String message = "Caractere invalido [" + c + "] na linha " + line + " e coluna " + column;
-//        System.out.println("[Erro Lexico]: " + message + "\n");
-//    }
-
     private void lexicError(String message) {
         System.out.println("[Erro Lexico]: " + message + "\n");
     }
-
 
     private void returnPointer() throws IOException {
         if ((char) lookahead != '\uFFFF') {
@@ -130,7 +123,7 @@ public class Lexer {
                     if(previousIsNumber()){// [STATE 25]
                         return returnToken(lexeme, Tag.OP_SUBTRACAO, line, atColumn);
                     } else {
-                        state = 1;
+                        return returnToken(lexeme, Tag.OPUNARIO_NEGATIVO, line, atColumn);
                     }
                 } else if (c == '+') {
                     lexeme += c;
@@ -146,22 +139,22 @@ public class Lexer {
                     lexeme += c;
                     atColumn = column;
                     //[STATE 28]
-                    return returnToken(lexeme, Tag.A_COLCHETE, line, atColumn);
+                    return returnToken(lexeme, Tag.ABRE_COLCHETE, line, atColumn);
                 } else if (c == ']') {
                     lexeme += c;
                     atColumn = column;
                     //[STATE 29]
-                    return returnToken(lexeme, Tag.F_COLCHETE, line, atColumn);
+                    return returnToken(lexeme, Tag.FECHA_COLCHETE, line, atColumn);
                 } else if (c == '(') {
                     lexeme += c;
                     atColumn = column;
                     //[STATE 30]
-                    return returnToken(lexeme, Tag.A_PARENTESES, line, atColumn);
+                    return returnToken(lexeme, Tag.ABRE_PARENTESES, line, atColumn);
                 } else if (c == ')') {
                     lexeme += c;
                     atColumn = column;
                     //[STATE 31]
-                    return returnToken(lexeme, Tag.F_PARENTESES, line, atColumn);
+                    return returnToken(lexeme, Tag.FECHA_PARENTESES, line, atColumn);
                 } else if (c == '.') {
                     lexeme += c;
                     atColumn = column;
@@ -204,7 +197,7 @@ public class Lexer {
                     lexeme += c;
                 } else { //[STATE 5]
                     returnPointer();
-                    return createToken(lexeme, Tag.CONSTINT, line, atColumn);
+                    return returnToken(lexeme, Tag.CONSTINT, line, atColumn);
                 }
             }
 
@@ -228,7 +221,7 @@ public class Lexer {
                     lexeme += c;
                 }  else { //[STATE 5]
                     returnPointer();
-                    return createToken(lexeme, Tag.CONSTDOUBLE, line, atColumn);
+                    return returnToken(lexeme, Tag.CONSTDOUBLE, line, atColumn);
                 }
             }
 
@@ -243,7 +236,7 @@ public class Lexer {
                     lexeme += c;
                 }
                 else { //[STATE 10]
-                    return createToken(lexeme, Tag.CONSTSTRING, line, atColumn);
+                    return returnToken(lexeme, Tag.CONSTSTRING, line, atColumn);
                 }
             }
 
