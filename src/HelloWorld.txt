@@ -1,4 +1,4 @@
-   # programa exemplo em Pyscal
+# programa exemplo em Pyscal
 	class Pressao2:
 		def bool podeEntregarDepois(bool dizQueSim):
 			return (true == dizQueSim);
