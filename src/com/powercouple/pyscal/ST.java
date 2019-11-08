@@ -1,7 +1,4 @@
-package Lexer.Token;
-
-import Lexer.Lexer;
-import Lexer.Token.Token;
+package com.powercouple.pyscal;
 
 import java.util.HashMap;
 import java.util.Map;

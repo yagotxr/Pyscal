@@ -1,20 +1,25 @@
-package Lexer;
-
-import Lexer.Token.ST;
-import Lexer.Token.Tag;
-import Lexer.Token.Token;
+package com.powercouple.pyscal;
 
 import java.io.*;
 import java.util.Optional;
 
 public class Lexer {
 
+//    private static String filePath = "/Users/yagohenrique/Google Drive/College/6º Periodo/Automatos, Linguagens Formais e Compiladores/Pyscal/src/";
+//    private static String filePath = "/home/carolinne/Pyscal/src/";
+    private static String filePath = "/home/yagoteixeira/Documents/Pyscal/src/";
+
+
+    private static String fileName = "HelloWorld.txt";
+
+    public static final String PATHNAME = filePath + fileName;
+
     private ST st;
     private RandomAccessFile fileReader;
     private int lookahead;
     private long line;
     private long column;
-    long atColumn;
+    private long atColumn;
     private int state;
     private String lexeme;
     private char c;
@@ -22,7 +27,8 @@ public class Lexer {
 
     public Lexer(File file) {
         try {
-            fileReader = new RandomAccessFile(file, "r");
+            String READ = "r";
+            fileReader = new RandomAccessFile(file, READ);
             lookahead = 0;
             line = 1;
             column = 0;
@@ -32,9 +38,7 @@ public class Lexer {
             c = '\u0000';
             nErros = 0;
         } catch (IOException ioException) {
-            System.out.println("Erro de abertura do arquivo." +
-                    "\nVerifique novamente o caminho do arquivo.");
-            System.exit(0);
+            fileOpeningError();
         }
     }
 
@@ -50,7 +54,7 @@ public class Lexer {
     }
 
     private void lexicError(String message) {
-        System.out.println("[Erro Lexico]: " + message + "\n");
+        System.out.println("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>[Erro Lexico]: " + message + "\n");
     }
 
     private void returnPointer() throws IOException {
@@ -174,7 +178,7 @@ public class Lexer {
                     atColumn = column;
                     //[STATE 34]
                     return returnToken(lexeme, Tag.DOIS_PONTOS, line, atColumn);
-                } else {
+                } else { //Panico
                     lexicError("Error:(" + line + "," + column + ") Invalid token [" + c + "]");
                     nErros++;
                 }
@@ -213,9 +217,9 @@ public class Lexer {
                     lexeme += c;
                 }  else {
                     lexicError("Error:(" + line + "," + column + ") Caracter inválido [" + c + "]");
-                    return Optional.empty();
+                    nErros++;
+                    return panic();
                 }
-//
             }
 
 ///[STATE 7]///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -235,6 +239,7 @@ public class Lexer {
                 if(c == '\n'){
                     lexicError("Unclosed String literal");
                     nErros++;
+                    return Optional.empty();
                 }
                 else if (c != '"') {
                     lexeme += c;
@@ -303,6 +308,19 @@ public class Lexer {
         }//end while
     } // end nextToken()
 
+    private Optional<Token> panic() throws IOException {
+        if(state == 6){
+            while(!Character.isDigit(c)){
+                c = (char) fileReader.read();
+                if(c == '\uFFFF'){
+                    return Optional.empty();
+                }
+            }
+            lexeme += c;
+            return createToken(lexeme, Tag.OP_IGUAL, line, atColumn);
+        }
+        return Optional.empty();
+    }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -351,6 +369,14 @@ public class Lexer {
         fileReader.seek(pointerLocation);
         return Character.isDigit(seenChar);
     }
+
+    private void fileOpeningError(){
+        System.out.println("File could not be opened." +
+                "\nPlease check if file exists or path is correct: " +
+                "\nFilePath: " + PATHNAME);
+        System.exit(0);
+    }
+
 }
 
 

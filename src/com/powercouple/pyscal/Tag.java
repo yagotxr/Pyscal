@@ -1,4 +1,4 @@
-package Lexer.Token;
+package com.powercouple.pyscal;
 
 public enum Tag {
 

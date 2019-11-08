@@ -1,6 +1,4 @@
-package Lexer.Token;
-
-import Lexer.Lexer;
+package com.powercouple.pyscal;
 
 public class Token {
 

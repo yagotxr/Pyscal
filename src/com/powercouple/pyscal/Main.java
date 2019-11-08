@@ -1,21 +1,17 @@
-import Lexer.Lexer;
-import Lexer.Token.Token;
-import Lexer.Token.Tag;
+package com.powercouple.pyscal;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
+import static com.powercouple.pyscal.Lexer.PATHNAME;
 
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        final String FILE_PATH = "/Users/yagohenrique/Google Drive/College/6º Periodo/Automatos, Linguagens Formais e Compiladores/Pyscal/src/";
-//        final String FILE_PATH = "/home/carolinne/Pyscal/src/";
-
-        String fileName = "HelloWorld.txt";
-        File file = new File(FILE_PATH + fileName);
+        File file = new File(PATHNAME);
         Lexer lexer = new Lexer(file);
         Optional<Token> token;
 

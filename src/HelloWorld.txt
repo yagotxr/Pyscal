@@ -8,10 +8,10 @@ class Pressao:
         write("Este eh um codigo de exemplo em Pyscal!");
         write(10(-10));
 
-        if(podeEntregarDepois()):
+        if(var1 > v@r8):
             write("Pode, mas nao tem ponto.");
-            write(-10.82-10+" pontos");
-
+            write(-10.82-10.a'" pontos");
+            write("testing 123"
         end;
     end;
 end.
