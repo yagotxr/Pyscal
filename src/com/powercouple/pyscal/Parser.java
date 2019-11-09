@@ -2,51 +2,44 @@ package com.powercouple.pyscal;
 
 import java.io.IOException;
 
-public class Parser{
+public interface Parser {
 
-    private Lexer lexer;
-    private Token token;
+    void programa() throws IOException;
+    void classe() throws IOException;
+    void declaraId() throws IOException;;
+    void listaFuncao() throws IOException;;
+    void listaFuncao_() throws IOException;;
+    void funcao() throws IOException;;
+    void regexDeclaraId();
+    void listaArg();
+    void listaArg_();
+    void arg();
+    void retorno();
+    void main();
+    void tipoPremitivo();
+    void listaCmd();
+    void listaCmd_();
+    void cmd();
+    void cmdAttibFunc();
+    void cmdIf();
+    void cmdIf_();
+    void cmdWhile();
+    void cmdWrite();
+    void cmdAtribui();
+    void cmdFuncao();
+    void regexExp();
+    void regexExp_();
+    void expressao();
+    void exp_();
+    void exp1();
+    void exp1_();
+    void exp2();
+    void exp2_();
+    void exp3();
+    void exp3_();
+    void exp4();
+    void exp4_();
+    void opUnario();
+    Lexer getLexer();
 
-    public Parser(Lexer lexer) throws IOException {
-        this.lexer = lexer;
-        this.token = lexer.nextToken().orElseThrow(() -> new RuntimeException("Token not found"));
-    }
-
-    public void sintaticError(String msg){
-        System.out.println(">>>>>>>>>>>>>>>>>> [Erro Sintatico] na linha " + token.getLine() + " e coluna " + token.getColumn() + ": ");
-        System.out.println(msg + "\n");
-    }
-
-    public void advance() throws IOException {
-        System.out.println("[DEBUG] token: " + token.toString());
-        this.token = lexer.nextToken().orElseThrow(() -> new RuntimeException("Token not found"));
-    }
-
-    public void skip(String msg) throws IOException {
-        this.sintaticError(msg);
-        this.advance();
-    }
-
-    public boolean eat(String token) throws IOException {
-        if(this.token.getName().equals(token)){
-            this.advance();
-            return true;
-        }
-        return false;
-    }
-
-    public void runParser(){
-        this.cmd();
-        if(!this.token.getName().equals(Tag.EOF.toString())){
-            this.sintaticError("Esperado \"EOF\"; encontrado " + "\"" + this.token.getLexeme() + "\"");
-        }
-    }
-
-    public void cmd(){
-        //Parei aqui
-    }
-
-    public Lexer getLexer() {
-        return lexer;
-    }
 }

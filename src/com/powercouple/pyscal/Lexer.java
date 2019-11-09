@@ -5,10 +5,10 @@ import java.util.Optional;
 
 public class Lexer {
 
-//    private static String filePath = "/Users/yagohenrique/Google Drive/College/6º Periodo/Automatos, Linguagens Formais e Compiladores/Pyscal/src/";
+    private static String filePath = "/Users/yagohenrique/Google Drive/College/6º Periodo/Automatos, Linguagens Formais e Compiladores/Pyscal/src/";
 //    private static String filePath = "/home/carolinne/Pyscal/src/";
 //    private static String filePath = "/home/yagoteixeira/Documents/Pyscal/src/";
-        private static String filePath = "/home/carolinne/IdeaProjects/Pyscal/src/";
+//        private static String filePath = "/home/carolinne/IdeaProjects/Pyscal/src/";
 
 
     private static String fileName = "HelloWorld.txt";
@@ -244,7 +244,8 @@ public class Lexer {
                 }
                 else if (c != '"') {
                     lexeme += c;
-                }else if (lexeme.isEmpty()){
+                }
+                else if (lexeme.isEmpty()){
                     lexicError("String is empty");
                     nErros++;
                     return Optional.empty();
