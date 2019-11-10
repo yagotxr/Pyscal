@@ -401,7 +401,7 @@ public class ParserImpl implements Parser {
     @Override
     //Expressao	→ Exp1 Exp’ 42
     public void expressao() throws IOException {
-        if(isTag(Tag.KW_DEF, Tag.ABRE_PARENTESES, Tag.VIRGULA, Tag.OP_OR, Tag.OP_AND)){
+        if(isTag(Tag.KW_DEF, Tag.FECHA_PARENTESES, Tag.VIRGULA, Tag.OP_OR, Tag.OP_AND)){
             exp1();
             exp_();
         } else {
