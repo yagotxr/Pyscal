@@ -33,13 +33,13 @@ public interface Parser {
     void exp_() throws IOException;
     void exp1() throws IOException;
     void exp1_() throws IOException;
-    void exp2();
-    void exp2_();
-    void exp3();
-    void exp3_();
-    void exp4();
-    void exp4_();
-    void opUnario();
+    void exp2() throws IOException;
+    void exp2_() throws IOException;
+    void exp3() throws IOException;
+    void exp3_() throws IOException;
+    void exp4() throws IOException;
+    void exp4_() throws IOException;
+    void opUnario() throws IOException;
     Lexer getLexer();
 
 }
