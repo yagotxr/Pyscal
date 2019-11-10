@@ -1,6 +1,6 @@
 # programa exemplo em Pyscal
 	class Pressao2:
-		def bobo kkk podeEntregarDepois(bool dizQueSim):
+		def podeEntregarDepois(bool dizQueSim):
 			return (true == dizQueSim);
 		end;
 
