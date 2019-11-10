@@ -46,10 +46,11 @@ public class ParserImpl implements Parser {
     @Override
     public void programa() throws IOException {
         //1
-        if(isTag(Tag.KW_CLASS))
+        if(isTag(Tag.KW_CLASS)){
             classe();
-        if(!eat(Tag.EOF))
-            sintaticError("Esperado \"EOF\"; encontrado " + "\"" + token.getName() + "\"");
+            if(!eat(Tag.EOF))
+                sintaticError("Esperado \"EOF\"; encontrado " + "\"" + token.getName() + "\"");
+        }
     }
 
     //Classe → "class" ID ":" ListaFuncao Main "end" "." 2
@@ -91,7 +92,6 @@ public class ParserImpl implements Parser {
             listaFuncao_();
         else
             skip("Esperado \"def, defstatic\"; encontrado " + "\"" + this.token.getName() + "\"");
-
     }
 
     @Override
@@ -234,7 +234,7 @@ public class ParserImpl implements Parser {
     //ListaCmd	→ ListaCmd’  22
     public void listaCmd() throws IOException {
         if(isTag(Tag.ID, Tag.KW_END, Tag.KW_RETURN, Tag.KW_IF, Tag.KW_ELSE, Tag.KW_WHILE, Tag.KW_WRITE))
-            listaArg_();
+            listaCmd_();
         else
             skip("Esperado \"ID, end, return, if, else, while, write\"; encontrado " + "\"" + this.token.getName() + "\"");
 
