@@ -1,6 +1,5 @@
 package com.powercouple.pyscal.impls;
 
-import com.powercouple.pyscal.Lexer;
 import com.powercouple.pyscal.Parser;
 import com.powercouple.pyscal.Tag;
 import com.powercouple.pyscal.Token;
@@ -9,12 +8,12 @@ import java.io.IOException;
 
 public class ParserImpl implements Parser {
 
-    private Lexer lexer;
+    private LexerImpl lexerImpl;
     private Token token;
 
-    public ParserImpl(Lexer lexer) throws IOException {
-        this.lexer = lexer;
-        this.token = lexer.nextToken().orElseThrow(() -> new RuntimeException("Token not found"));
+    public ParserImpl(LexerImpl lexerImpl) throws IOException {
+        this.lexerImpl = lexerImpl;
+        this.token = lexerImpl.nextToken().orElseThrow(() -> new RuntimeException("Token not found"));
     }
 
     public void sintaticError(String msg){
@@ -24,7 +23,7 @@ public class ParserImpl implements Parser {
 
     public void advance() throws IOException {
         System.out.println("[DEBUG] token: " + token.toString());
-        this.token = lexer.nextToken().orElseThrow(() -> new RuntimeException("Token not found"));
+        this.token = lexerImpl.nextToken().orElseThrow(() -> new RuntimeException("Token not found"));
     }
 
     public void skip(String msg) throws IOException {
@@ -562,8 +561,8 @@ public class ParserImpl implements Parser {
     }
 
     @Override
-    public Lexer getLexer() {
-        return lexer;
+    public LexerImpl getLexerImpl() {
+        return lexerImpl;
     }
 
     private boolean isTag(Tag... tags){

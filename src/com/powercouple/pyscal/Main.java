@@ -1,11 +1,12 @@
 package com.powercouple.pyscal;
 
+import com.powercouple.pyscal.impls.LexerImpl;
 import com.powercouple.pyscal.impls.ParserImpl;
 
 import java.io.File;
 import java.io.IOException;
 
-import static com.powercouple.pyscal.Lexer.PATHNAME;
+import static com.powercouple.pyscal.impls.LexerImpl.PATHNAME;
 
 
 public class Main {
@@ -13,16 +14,16 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         File file = new File(PATHNAME);
-        Lexer lexer = new Lexer(file);
-        Parser parser = new ParserImpl(lexer);
+        LexerImpl lexerImpl = new LexerImpl(file);
+        Parser parser = new ParserImpl(lexerImpl);
 
         parser.programa();
 
-        parser.getLexer().closeFile();
+        parser.getLexerImpl().closeFile();
 
         System.out.println("\n=>Tabela de simbolos:");
-        lexer.printTS();
-        lexer.closeFile();
+        lexerImpl.printTS();
+        lexerImpl.closeFile();
 
         System.out.println("\n=> Fim da compilacao");
     }

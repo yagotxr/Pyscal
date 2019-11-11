@@ -1,5 +1,7 @@
 package com.powercouple.pyscal;
 
+import com.powercouple.pyscal.impls.LexerImpl;
+
 import java.io.IOException;
 
 public interface Parser {
@@ -40,6 +42,6 @@ public interface Parser {
     void exp4() throws IOException;
     void exp4_() throws IOException;
     void opUnario() throws IOException;
-    Lexer getLexer();
+    LexerImpl getLexerImpl();
 
 }
