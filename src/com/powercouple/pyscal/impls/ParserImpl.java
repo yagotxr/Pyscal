@@ -295,12 +295,12 @@ public class ParserImpl implements Parser {
     @Override
     //ListaCmd	→ ListaCmd’  22
     public void listaCmd() throws IOException {
-        if(isNext(Tag.ID, Tag.KW_END, Tag.KW_RETURN, Tag.KW_IF, Tag.KW_ELSE, Tag.KW_WHILE, Tag.KW_WRITE))
+        if(isNext(Tag.ID, Tag.KW_IF, Tag.KW_WHILE, Tag.KW_WRITE, Tag.KW_RETURN))
 
             listaCmd_();
 
         else
-            skip("Esperado \"ID, end, return, if, else, while, write\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("Esperado \"ID, if, while, write\"; encontrado " + "\"" + this.token.getName() + "\"");
     }
 
     @Override
@@ -316,7 +316,7 @@ public class ParserImpl implements Parser {
         }
 
         if(!isNext(Tag.KW_END,Tag.KW_RETURN,Tag.KW_ELSE)){
-            sintaticError("Esperado \"ID, if, while, write, end, return, else\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("Esperado \"ID, if, while, write, end, return, else\"; encontrado " + "\"" + this.token.getName() + "\"");
         }
     }
 
@@ -362,7 +362,7 @@ public class ParserImpl implements Parser {
         }
 
         else {
-            sintaticError("Esperado \"(, =\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("Esperado \"(, =\"; encontrado " + "\"" + this.token.getName() + "\"");
         }
     }
 
@@ -526,7 +526,7 @@ public class ParserImpl implements Parser {
     @Override
     //Expressao	→ Exp1 Exp’ 42
     public void expressao() throws IOException {
-        if(isNext(Tag.PONTO_VIRGULA, Tag.ABRE_PARENTESES, Tag.VIRGULA, Tag.OP_OR, Tag.OP_AND)){
+        if(isNext(Tag.ID, Tag.CONST_INT, Tag.CONST_DOUBLE, Tag.CONST_STRING, Tag.KW_TRUE, Tag.KW_FALSE, Tag.ABRE_PARENTESES, Tag.OPUNARIO_NEGACAO, Tag.OPUNARIO_NEGATIVO)){
             exp1();
 
             exp_();
@@ -589,9 +589,6 @@ public class ParserImpl implements Parser {
 
          if(!isNext(Tag.PONTO_VIRGULA, Tag.FECHA_PARENTESES, Tag.VIRGULA, Tag.OP_OR, Tag.OP_AND))
             sintaticError("Esperado \"), ,\"; encontrado " + "\"" + this.token.getName() + "\"");
-
-        else
-            skip("Esperado \", >, >=, <, <=, ==, !=, ;, ), ,\"; encontrado " + "\"" + this.token.getName() + "\"");
     }
 
     @Override
