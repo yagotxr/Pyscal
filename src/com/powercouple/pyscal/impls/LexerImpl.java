@@ -60,7 +60,7 @@ public class LexerImpl implements Lexer {
     }
 
     private void lexicError(String message) {
-        System.out.println("\n>>>>>>>>>>>>>>>>>>>[Erro Lexico]: " + message);
+        System.out.println("\n>>>>>>>>>>>>>>>>>>>[ Erro  Lexico ] " + message);
     }
 
     private void returnPointer() throws IOException {
@@ -251,12 +251,13 @@ public class LexerImpl implements Lexer {
                 else if (c != '"') {
                     lexeme += c;
                 }
-//                else if (lexeme.isEmpty()){
-//                    lexicError("String is empty");
-//                    nErros++;
-//                    return Optional.empty();
-//                }
+
                 else { //[STATE 10]
+                    if(lexeme.isEmpty()){
+                        lexicError("String is empty;");
+                        nErros++;
+                        return Optional.empty();
+                    }
                     return returnToken(lexeme, Tag.CONST_STRING, line, atColumn);
                 }
             }
@@ -388,7 +389,6 @@ public class LexerImpl implements Lexer {
                 "\nFilePath: " + PATHNAME);
         System.exit(0);
     }
-
 }
 
 

@@ -5,6 +5,7 @@ import com.powercouple.pyscal.Tag;
 import com.powercouple.pyscal.Token;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class ParserImpl implements Parser {
 
@@ -16,9 +17,9 @@ public class ParserImpl implements Parser {
         this.token = lexerImpl.nextToken().orElseThrow(() -> new RuntimeException("Token not found"));
     }
 
-    private void sintaticError(String msg){
-        System.out.println(">>>>>>>>>>>>>>>>>> [Erro Sintatico] na linha " + token.getLine() + " e coluna " + token.getColumn() + ": ");
-        System.out.println(msg + "\n");
+    private void sintaticError(String... esperados){
+        System.out.print(">>>>>>>>>>>>>>>>>>>[Erro Sintatico] Error:(" + token.getLine() + "," + token.getColumn() + ") ");
+        System.out.println("Esperado: " + printWaitedTokens(esperados) + "\"; encontrado " + "\"" + token.getName() + "\"" + "\n");
     }
 
     private void advance() throws IOException {
@@ -26,8 +27,8 @@ public class ParserImpl implements Parser {
         this.token = lexerImpl.nextToken().orElseThrow(() -> new RuntimeException("Token not found"));
     }
 
-    private void skip(String msg) throws IOException {
-        this.sintaticError(msg);
+    private void skip(String... esperados) throws IOException {
+        this.sintaticError(esperados);
         this.advance();
     }
 
@@ -50,7 +51,7 @@ public class ParserImpl implements Parser {
             classe();
 
         if(!eat(Tag.EOF))
-            sintaticError("Esperado \"EOF\"; encontrado " + "\"" + token.getName() + "\"");
+            sintaticError("EOF");
     }
 
     //Classe → "class" ID ":" ListaFuncao Main "end" "." 2
@@ -59,22 +60,22 @@ public class ParserImpl implements Parser {
         //2
         if (eat(Tag.KW_CLASS)) {
             if (!eat(Tag.ID))
-                sintaticError("Esperado \"ID\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("ID");
 
             if (!eat(Tag.DOIS_PONTOS))
-                sintaticError("Esperado \":\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError(":");
 
             listaFuncao();
             main();
 
             if (!eat(Tag.KW_END))
-                sintaticError("Esperado \"end\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("end");
 
             if (!eat(Tag.PONTO))
-                sintaticError("Esperado \".\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError(".");
 
         } else
-            sintaticError("Esperado \"class\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("class");
     }
 
     @Override
@@ -85,13 +86,13 @@ public class ParserImpl implements Parser {
             tipoPrimitivo();
 
             if(!eat(Tag.ID))
-                sintaticError("Esperado \"ID\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("ID");
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError("Esperado \";\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError(";");
 
         } else
-            skip("Esperado \"void, String, bool, integer, double\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("void", "String", "bool", "int", "double", "ID", ";");
     }
 
     @Override
@@ -101,7 +102,7 @@ public class ParserImpl implements Parser {
             listaFuncao_();
 
         else
-            skip("Esperado \"def, defstatic\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("def", "defstatic");
     }
 
     @Override
@@ -116,7 +117,7 @@ public class ParserImpl implements Parser {
         }
 
         if(!isNext(Tag.KW_DEFSTATIC))
-            skip("Esperado \"def\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("def", "defstatic");
     }
 
     @Override
@@ -127,18 +128,18 @@ public class ParserImpl implements Parser {
             tipoPrimitivo();
 
             if(!eat(Tag.ID))
-                sintaticError("Esperado \"ID\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("ID");
 
             if(!eat(Tag.ABRE_PARENTESES))
-                sintaticError("Esperado \"(\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("(");
 
             listaArg();
 
             if(!eat(Tag.FECHA_PARENTESES))
-                sintaticError("Esperado \")\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError(")");
 
             if(!eat(Tag.DOIS_PONTOS))
-                sintaticError("Esperado \":\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError(":");
 
             regexDeclaraId();
 
@@ -147,14 +148,14 @@ public class ParserImpl implements Parser {
             retorno();
 
             if(!eat(Tag.KW_END))
-                sintaticError("Esperado \"end\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("end");
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError("Esperado \";\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError(";");
         }
 
         else {
-            sintaticError("Esperado \"def\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("def");
         }
     }
 
@@ -171,7 +172,7 @@ public class ParserImpl implements Parser {
         }
 
         if (!isNext(Tag.ID, Tag.KW_END, Tag.KW_RETURN, Tag.KW_IF, Tag.KW_WHILE, Tag.KW_WRITE)) {
-            skip("Esperado \"void, String, bool, integer, double, ID, end, return, if, while, write\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("void", "String", "bool", "integer", "double", "ID", "end", "return", "if", "while", "write");
         }
     }
 
@@ -186,7 +187,7 @@ public class ParserImpl implements Parser {
         }
 
         else {
-            skip("Esperado \"void, String, bool, integer, double\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("void", "String", "bool", "integer", "double");
         }
 
     }
@@ -200,7 +201,7 @@ public class ParserImpl implements Parser {
         }
 
         if(!isNext(Tag.FECHA_PARENTESES))
-            skip("Esperado \",, )\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip(",",  ")");
     }
 
     @Override
@@ -211,11 +212,11 @@ public class ParserImpl implements Parser {
             tipoPrimitivo();
 
             if(!eat(Tag.ID))
-                sintaticError("Esperado \"ID\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("ID");
         }
 
         else {
-            skip("Esperado \"void, String, bool, integer, double\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("void", "String", "bool", "integer", "double");
         }
     }
 
@@ -227,12 +228,12 @@ public class ParserImpl implements Parser {
             expressao();
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError("Esperado \";\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError(";");
             return;
         }
 
         if(!isNext(Tag.KW_END)){
-            skip("Esperado \"void, String, bool, integer, double\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("void", "String", "bool", "integer", "double");
         }
     }
 
@@ -242,46 +243,46 @@ public class ParserImpl implements Parser {
         if(eat(Tag.KW_DEFSTATIC)){
 
             if(!eat(Tag.KW_VOID))
-                sintaticError("Esperado \"void\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("void");
 
             if(!eat(Tag.KW_MAIN))
-                sintaticError("Esperado \"main\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("main");
 
             if(!eat(Tag.ABRE_PARENTESES))
-                sintaticError("Esperado \"(\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("(");
 
             if(!eat(Tag.KW_STRING))
-                sintaticError("Esperado \"String\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("String");
 
             if(!eat(Tag.ABRE_COLCHETE))
-                sintaticError("Esperado \"[\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("[");
 
             if(!eat(Tag.FECHA_COLCHETE))
-                sintaticError("Esperado \"]\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("]");
 
             if(!eat(Tag.ID))
-                sintaticError("Esperado \"ID\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("ID");
 
             if(!eat(Tag.FECHA_PARENTESES))
-                sintaticError("Esperado \")\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError(")");
 
             if(!eat(Tag.DOIS_PONTOS))
-                sintaticError("Esperado \":\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError(":");
 
             regexDeclaraId();
 
             listaCmd();
 
             if(!eat(Tag.KW_END))
-                sintaticError("Esperado \"end\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("end");
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError("Esperado \";\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError(";");
 
         }
 
         else {
-            skip("Esperado \"defstatic\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("defstatic");
         }
     }
 
@@ -289,7 +290,7 @@ public class ParserImpl implements Parser {
     //TipoPrimitivo → "bool" 17 | "integer" 18 | "String" 19 | "double" 20 | "void" 21
     public void tipoPrimitivo() throws IOException {
         if(!eat(Tag.KW_BOOL, Tag.KW_INTEGER, Tag.KW_STRING, Tag.KW_DOUBLE, Tag.KW_VOID))
-            sintaticError("Esperado \"bool, integer, String, double, void\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("bool", "integer", "String", "double", "void");
     }
 
     @Override
@@ -300,7 +301,7 @@ public class ParserImpl implements Parser {
             listaCmd_();
 
         else
-            skip("Esperado \"ID, if, while, write\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("ID", "if", "while", "write");
     }
 
     @Override
@@ -316,7 +317,7 @@ public class ParserImpl implements Parser {
         }
 
         if(!isNext(Tag.KW_END,Tag.KW_RETURN,Tag.KW_ELSE)){
-            skip("Esperado \"ID, if, while, write, end, return, else\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("ID", "if", "while", "write", "end", "return", "else");
         }
     }
 
@@ -345,7 +346,7 @@ public class ParserImpl implements Parser {
         }
 
         else
-            sintaticError("Esperado \"ID, if, while, write\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("ID", "if", "while", "write");
 
     }
 
@@ -362,7 +363,7 @@ public class ParserImpl implements Parser {
         }
 
         else {
-            skip("Esperado \"(, =\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("(", "=");
         }
     }
 
@@ -370,18 +371,18 @@ public class ParserImpl implements Parser {
     //CmdIF	→ "if" "(" Expressao ")" ":" ListaCmd CmdIF’ 31
     public void cmdIf() throws IOException {
         if(!eat(Tag.KW_IF))
-            sintaticError("Esperado \"if\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("if");
 
         if(!eat(Tag.ABRE_PARENTESES))
-            sintaticError("Esperado \"(\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("(");
 
         expressao();
 
         if(!eat(Tag.FECHA_PARENTESES))
-            sintaticError("Esperado \")\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError(")");
 
         if(!eat(Tag.DOIS_PONTOS))
-            sintaticError("Esperado \":\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError(":");
 
         listaCmd();
 
@@ -394,7 +395,7 @@ public class ParserImpl implements Parser {
         if(eat(Tag.KW_END)){
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError("Esperado \";\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError(";");
 
             return;
         }
@@ -402,64 +403,64 @@ public class ParserImpl implements Parser {
         if(eat(Tag.KW_ELSE)){
 
             if(!eat(Tag.DOIS_PONTOS))
-                sintaticError("Esperado \":\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError(":");
 
             listaCmd();
 
             if(!eat(Tag.KW_END))
-                sintaticError("Esperado \"end\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError("end");
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError("Esperado \";\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError(";");
 
         }
 
         else
-            sintaticError("Esperado \"end, else\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("end, else");
     }
 
     @Override
     //CmdWhile	→ "while" "(" Expressao ")" ":" ListaCmd "end" ";" 34
     public void cmdWhile() throws IOException {
         if(!eat(Tag.KW_WHILE))
-            sintaticError("Esperado \"(\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("while");
 
         if(!eat(Tag.ABRE_PARENTESES))
-            sintaticError("Esperado \"(\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("(");
 
         expressao();
 
         if(!eat(Tag.FECHA_PARENTESES))
-            sintaticError("Esperado \")\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError(")");
 
         if(!eat(Tag.DOIS_PONTOS))
-            sintaticError("Esperado \":\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError(":");
 
         listaCmd();
 
         if(!eat(Tag.KW_END))
-            sintaticError("Esperado \"end\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("end");
 
         if(!eat(Tag.PONTO_VIRGULA))
-            sintaticError("Esperado \";\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError(";");
     }
 
     @Override
     //CmdWrite	→ "write" "(" Expressao ")" ";" 35
     public void cmdWrite() throws IOException {
         if(!eat(Tag.KW_WRITE))
-            sintaticError("Esperado \"write\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("write");
 
         if(!eat(Tag.ABRE_PARENTESES))
-            sintaticError("Esperado \"(\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("(");
 
         expressao();
 
         if(!eat(Tag.FECHA_PARENTESES))
-            sintaticError("Esperado \")\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError(")");
 
         if(!eat(Tag.PONTO_VIRGULA))
-            sintaticError("Esperado \";\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError(";");
 
     }
 
@@ -467,27 +468,27 @@ public class ParserImpl implements Parser {
     //CmdAtribui → "=" Expressao ";" 36
     public void cmdAtribui() throws IOException {
         if(!eat(Tag.OP_IGUAL))
-            sintaticError("Esperado \"=\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("=");
 
         expressao();
 
         if(!eat(Tag.PONTO_VIRGULA))
-            sintaticError("Esperado \";\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError(";");
     }
 
     @Override
     //CmdFuncao	→ "(" RegexExp ")" ";" 37
     public void cmdFuncao() throws IOException {
         if(!eat(Tag.ABRE_PARENTESES))
-            sintaticError("Esperado \"(\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("(");
 
         regexExp();
 
         if(!eat(Tag.FECHA_PARENTESES))
-            sintaticError("Esperado \")\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError(")");
 
         if(!eat(Tag.PONTO_VIRGULA))
-            sintaticError("Esperado \";\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError(";");
     }
 
     @Override
@@ -505,7 +506,7 @@ public class ParserImpl implements Parser {
         }
 
         if(!isNext(Tag.FECHA_PARENTESES))
-            skip("Esperado \")\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip(")", "ID", "(", "integer", "double", "String", "true", "false", "!", "-n");
     }
 
     @Override
@@ -520,7 +521,7 @@ public class ParserImpl implements Parser {
         }
 
         if(!isNext(Tag.FECHA_PARENTESES))
-            sintaticError("Esperado \"), ,\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError(")", ",");
     }
 
     @Override
@@ -533,7 +534,7 @@ public class ParserImpl implements Parser {
         }
 
         else {
-            skip("Esperado \";, ), ,, or, and\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("ID", "integer", "double", "String", "true", "false", "(", "!", "-");
         }
     }
 
@@ -551,7 +552,7 @@ public class ParserImpl implements Parser {
         }
         //45
         if(!isNext(Tag.PONTO_VIRGULA, Tag.FECHA_PARENTESES, Tag.VIRGULA)){
-            skip("Esperado \"or, and, ;, ), ,\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("or", "and", ";", ")", ",");
         }
     }
 
@@ -569,7 +570,7 @@ public class ParserImpl implements Parser {
         }
 
         else {
-            skip("Esperado \"ID, (, consInt, constDouble, constStr, true, false, -, !\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("ID", "(", "consInt", "constDouble", "constStr", "true", "false", "-", "!");
         }
     }
 
@@ -588,7 +589,7 @@ public class ParserImpl implements Parser {
         }
 
          if(!isNext(Tag.PONTO_VIRGULA, Tag.FECHA_PARENTESES, Tag.VIRGULA, Tag.OP_OR, Tag.OP_AND))
-            sintaticError("Esperado \"), ,\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("<", "<=", ">", ">=", ",", "or", "and", "==", "!=");
     }
 
     @Override
@@ -605,7 +606,7 @@ public class ParserImpl implements Parser {
         }
 
         else {
-            skip("Esperado \"ID, (, consInt, constDouble, constStr, true, false, -, !\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("ID", "(", "consInt", "constDouble", "constStr", "true", "false", "-", "!");
         }
     }
 
@@ -624,7 +625,7 @@ public class ParserImpl implements Parser {
 
         if(!isNext(Tag.PONTO_VIRGULA, Tag.FECHA_PARENTESES, Tag.VIRGULA, Tag.OP_OR, Tag.OP_AND, Tag.OP_MAIOR, Tag.OP_MAIOR_IGUAL,
                 Tag.OP_MENOR, Tag.OP_MENOR_IGUAL, Tag.OP_COMPARACAO, Tag.OP_DIFERENTE)){
-            skip("Esperado \"+, -, ;, ), ,, or, and, <, <=, >, >=, ==, !=\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("+", "-", ";", ")", ",", "or", "and", "<", "<=", ">", ">=", "==", "!=");
         }
     }
 
@@ -641,7 +642,7 @@ public class ParserImpl implements Parser {
         }
 
         else {
-            skip("Esperado \"ID, (, constInt, constDouble, constString, true, false, !, -n\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("ID", "(", "constInt", "constDouble", "constString", "true", "false", "!", "-n");
         }
     }
 
@@ -660,7 +661,7 @@ public class ParserImpl implements Parser {
         //61
         if(!isNext(Tag.PONTO_VIRGULA, Tag.FECHA_PARENTESES, Tag.VIRGULA, Tag.OP_OR, Tag.OP_AND, Tag.OP_MAIOR, Tag.OP_MAIOR_IGUAL,
                 Tag.OP_MENOR, Tag.OP_MENOR_IGUAL, Tag.OP_COMPARACAO, Tag.OP_DIFERENTE, Tag.OP_SOMA, Tag.OP_SUBTRACAO)){
-            skip("Esperado \";, ), ,, or, and, <, <=, >, >= , ==, != , +, -\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip(";", ")", ",", "or", "and", "<", "<=", ">", ">=" , "==", "!=" , "+", "-");
         }
     }
 
@@ -689,13 +690,13 @@ public class ParserImpl implements Parser {
             expressao();
 
             if(!eat(Tag.FECHA_PARENTESES))
-                sintaticError("Esperado \")\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError(")");
 
             return;
         }
         //63 //64 //65 //66 //67
         if(!eat(Tag.CONST_INT, Tag.CONST_DOUBLE, Tag.CONST_STRING, Tag.KW_TRUE, Tag.KW_FALSE)){
-            sintaticError("Esperado \"ID, constInt, constDouble, constStr, true, false, !, -n, (\"; encontrado " + "\"" + this.token.getName() + "\"");
+            sintaticError("ID", "constInt", "constDouble", "constStr", "true", "false", "!", "-n", "(");
         }
     }
 
@@ -708,7 +709,7 @@ public class ParserImpl implements Parser {
             regexExp();
 
             if(!eat(Tag.FECHA_PARENTESES))
-                sintaticError("Esperado \")\"; encontrado " + "\"" + this.token.getName() + "\"");
+                sintaticError(")");
 
             return;
         }
@@ -717,7 +718,7 @@ public class ParserImpl implements Parser {
         if(!isNext(Tag.PONTO_VIRGULA, Tag.FECHA_PARENTESES, Tag.VIRGULA, Tag.OP_OR, Tag.OP_AND, Tag.OP_MAIOR,
                 Tag.OP_MAIOR_IGUAL,Tag.OP_MENOR, Tag.OP_MENOR_IGUAL, Tag.OP_COMPARACAO, Tag.OP_DIFERENTE,
                 Tag.OP_SOMA, Tag.OP_SUBTRACAO, Tag.OP_MULTIPLICACAO, Tag.OP_DIVISAO)){
-            skip("Esperado \";, ), ,, or, and, <, <=, >, >= , ==, != , +, -, *, /\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip(";", ")", ",", "or", "and", "<", "<=", ">", ">=" , "==", "!=" , "+", "-", "*", "/");
         }
     }
 
@@ -726,7 +727,7 @@ public class ParserImpl implements Parser {
     public void opUnario() throws IOException {
         //72 //73
         if(!eat(Tag.OPUNARIO_NEGATIVO, Tag.OPUNARIO_NEGACAO))
-            skip("Esperado \"-n, !\"; encontrado " + "\"" + this.token.getName() + "\"");
+            skip("-n", "!");
     }
 
     @Override
@@ -741,5 +742,13 @@ public class ParserImpl implements Parser {
             }
         }
         return false;
+    }
+
+    private String printWaitedTokens(String[] tokens){
+        String formattedString = "";
+        for(String t : tokens){
+            formattedString += "[" + t + "]";
+        }
+        return formattedString;
     }
 }
