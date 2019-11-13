@@ -1,4 +1,4 @@
-package Lexer;
+package com.powercouple.pyscal;
 
 public enum Tag {
 
@@ -45,16 +45,16 @@ public enum Tag {
     OPUNARIO_NEGATIVO,
 
     ID,
-    CONSTINT,
-    CONSTSTRING,
-    CONSTDOUBLE,
+    CONST_INT,
+    CONST_STRING,
+    CONST_DOUBLE,
 
     PONTO, // .
     DOIS_PONTOS, // :
     PONTO_VIRGULA, //;
     VIRGULA,  // ,
-    A_PARENTESES,  // (
-    F_PARENTESES, // )
-    A_COLCHETE, // [
-    F_COLCHETE, // ]
+    ABRE_PARENTESES,  // (
+    FECHA_PARENTESES, // )
+    ABRE_COLCHETE, // [
+    FECHA_COLCHETE, // ]
 }

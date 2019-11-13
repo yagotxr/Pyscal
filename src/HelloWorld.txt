@@ -1,17 +1,19 @@
-class Pressao:
-    def bool podeEntregarDepois():
-        return false
-    end;
+     # programa exemplo em Pyscal
+  	class Pressao2:
+  	def bool podeEntregarDepois(bool dizQueSim):
+  		return (true == dizQueSim);
+  	end;
 
-    defstatic void main(String[] args):
-        write("Caros alunos de Compiladores");
-        write("Este eh um codigo de exemplo em Pyscal!");
-        write("");
+  		defstatic void main(String[] args):
+  		write("Caros alunos de Compiladores,");
+  			write("");
 
-        if(podeEntregarDepois()):
-            write("Pode, mas nao tem ponto.");
-            write(-10.82-10+" pontos");
+  write("Este eh um codigo de exemplo em Pyscal!");
+  			write("");
 
-        end;
-    end;
-end.
+  			if(podeEntregarDepois(true)):
+  				write("Pode, mas nao tem ponto.");
+  			end;
+  		end;
+  	end.
+
