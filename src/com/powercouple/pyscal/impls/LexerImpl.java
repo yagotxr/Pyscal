@@ -253,6 +253,11 @@ public class LexerImpl implements Lexer {
                 }
 
                 else { //[STATE 10]
+                    if(lexeme.isEmpty()){
+                        lexicError("String is empty");
+                        nErros++;
+                        return Optional.empty();
+                    }
                     return returnToken(lexeme, Tag.CONST_STRING, line, atColumn);
                 }
             }

@@ -24,7 +24,12 @@ public class ParserImpl implements Parser {
 
     private void advance() throws IOException {
         System.out.println("[DEBUG] token: " + token.toString());
-        this.token = lexerImpl.nextToken().orElseThrow(() -> new RuntimeException("Token not found"));
+        try {
+            this.token = lexerImpl.nextToken().orElseThrow(RuntimeException::new);
+        } catch(RuntimeException re) {
+            System.out.println("[Token not found]");
+        }
+
     }
 
     private void skip(String... esperados) throws IOException {
