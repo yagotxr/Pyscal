@@ -17,6 +17,11 @@ public class ParserImpl implements Parser {
         this.token = lexerImpl.nextToken().orElseThrow(() -> new RuntimeException("Token not found"));
     }
 
+    private void semanticError(String message){
+        System.out.print(">>>>>>>>>>>>>>>>>>>[Erro Semantico] Error:(" + token.getLine() + "," + token.getColumn() + ") ");
+        System.out.println(message);
+    }
+
     private void sintaticError(String... esperados){
         System.out.print(">>>>>>>>>>>>>>>>>>>[Erro Sintatico] Error:(" + token.getLine() + "," + token.getColumn() + ") ");
         System.out.println("Esperado: " + printWaitedTokens(esperados) + "\"; encontrado " + "\"" + token.getName() + "\"" + "\n");
