@@ -57,4 +57,7 @@ public enum Tag {
     FECHA_PARENTESES, // )
     ABRE_COLCHETE, // [
     FECHA_COLCHETE, // ]
+
+
+    TIPO_VAZIO
 }

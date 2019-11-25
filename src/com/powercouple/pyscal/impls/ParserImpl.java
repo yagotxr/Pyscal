@@ -5,7 +5,6 @@ import com.powercouple.pyscal.Tag;
 import com.powercouple.pyscal.Token;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class ParserImpl implements Parser {
 
@@ -17,9 +16,14 @@ public class ParserImpl implements Parser {
         this.token = lexerImpl.nextToken().orElseThrow(() -> new RuntimeException("Token not found"));
     }
 
-    private void sintaticError(String... esperados){
+    private void syntacticError(String... esperados){
         System.out.print(">>>>>>>>>>>>>>>>>>>[Erro Sintatico] Error:(" + token.getLine() + "," + token.getColumn() + ") ");
         System.out.println("Esperado: " + printWaitedTokens(esperados) + "\"; encontrado " + "\"" + token.getName() + "\"" + "\n");
+    }
+
+    private void semanticError(String... msg){
+        System.out.print(">>>>>>>>>>>>>>>>>>>[Erro Semantico] Error:(" + token.getLine() + "," + token.getColumn() + ") ");
+        System.out.println("Esperado: " + printWaitedTokens(msg) + "\"; encontrado " + "\"" + token.getName() + "\"" + "\n");
     }
 
     private void advance() throws IOException {
@@ -33,7 +37,7 @@ public class ParserImpl implements Parser {
     }
 
     private void skip(String... esperados) throws IOException {
-        this.sintaticError(esperados);
+        this.syntacticError(esperados);
         this.advance();
     }
 
@@ -56,7 +60,7 @@ public class ParserImpl implements Parser {
             classe();
 
         if(!eat(Tag.EOF))
-            sintaticError("EOF");
+            syntacticError("EOF");
     }
 
     //Classe → "class" ID ":" ListaFuncao Main "end" "." 2
@@ -65,22 +69,22 @@ public class ParserImpl implements Parser {
         //2
         if (eat(Tag.KW_CLASS)) {
             if (!eat(Tag.ID))
-                sintaticError("ID");
+                syntacticError("ID");
 
             if (!eat(Tag.DOIS_PONTOS))
-                sintaticError(":");
+                syntacticError(":");
 
             listaFuncao();
             main();
 
             if (!eat(Tag.KW_END))
-                sintaticError("end");
+                syntacticError("end");
 
             if (!eat(Tag.PONTO))
-                sintaticError(".");
+                syntacticError(".");
 
         } else
-            sintaticError("class");
+            syntacticError("class");
     }
 
     @Override
@@ -91,10 +95,10 @@ public class ParserImpl implements Parser {
             tipoPrimitivo();
 
             if(!eat(Tag.ID))
-                sintaticError("ID");
+                syntacticError("ID");
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError(";");
+                syntacticError(";");
 
         } else
             skip("void", "String", "bool", "int", "double", "ID", ";");
@@ -133,18 +137,18 @@ public class ParserImpl implements Parser {
             tipoPrimitivo();
 
             if(!eat(Tag.ID))
-                sintaticError("ID");
+                syntacticError("ID");
 
             if(!eat(Tag.ABRE_PARENTESES))
-                sintaticError("(");
+                syntacticError("(");
 
             listaArg();
 
             if(!eat(Tag.FECHA_PARENTESES))
-                sintaticError(")");
+                syntacticError(")");
 
             if(!eat(Tag.DOIS_PONTOS))
-                sintaticError(":");
+                syntacticError(":");
 
             regexDeclaraId();
 
@@ -153,14 +157,14 @@ public class ParserImpl implements Parser {
             retorno();
 
             if(!eat(Tag.KW_END))
-                sintaticError("end");
+                syntacticError("end");
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError(";");
+                syntacticError(";");
         }
 
         else {
-            sintaticError("def");
+            syntacticError("def");
         }
     }
 
@@ -217,7 +221,7 @@ public class ParserImpl implements Parser {
             tipoPrimitivo();
 
             if(!eat(Tag.ID))
-                sintaticError("ID");
+                syntacticError("ID");
         }
 
         else {
@@ -233,7 +237,7 @@ public class ParserImpl implements Parser {
             expressao();
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError(";");
+                syntacticError(";");
             return;
         }
 
@@ -248,41 +252,41 @@ public class ParserImpl implements Parser {
         if(eat(Tag.KW_DEFSTATIC)){
 
             if(!eat(Tag.KW_VOID))
-                sintaticError("void");
+                syntacticError("void");
 
             if(!eat(Tag.KW_MAIN))
-                sintaticError("main");
+                syntacticError("main");
 
             if(!eat(Tag.ABRE_PARENTESES))
-                sintaticError("(");
+                syntacticError("(");
 
             if(!eat(Tag.KW_STRING))
-                sintaticError("String");
+                syntacticError("String");
 
             if(!eat(Tag.ABRE_COLCHETE))
-                sintaticError("[");
+                syntacticError("[");
 
             if(!eat(Tag.FECHA_COLCHETE))
-                sintaticError("]");
+                syntacticError("]");
 
             if(!eat(Tag.ID))
-                sintaticError("ID");
+                syntacticError("ID");
 
             if(!eat(Tag.FECHA_PARENTESES))
-                sintaticError(")");
+                syntacticError(")");
 
             if(!eat(Tag.DOIS_PONTOS))
-                sintaticError(":");
+                syntacticError(":");
 
             regexDeclaraId();
 
             listaCmd();
 
             if(!eat(Tag.KW_END))
-                sintaticError("end");
+                syntacticError("end");
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError(";");
+                syntacticError(";");
 
         }
 
@@ -295,7 +299,7 @@ public class ParserImpl implements Parser {
     //TipoPrimitivo → "bool" 17 | "integer" 18 | "String" 19 | "double" 20 | "void" 21
     public void tipoPrimitivo() throws IOException {
         if(!eat(Tag.KW_BOOL, Tag.KW_INTEGER, Tag.KW_STRING, Tag.KW_DOUBLE, Tag.KW_VOID))
-            sintaticError("bool", "integer", "String", "double", "void");
+            syntacticError("bool", "integer", "String", "double", "void");
     }
 
     @Override
@@ -351,7 +355,7 @@ public class ParserImpl implements Parser {
         }
 
         else
-            sintaticError("ID", "if", "while", "write");
+            syntacticError("ID", "if", "while", "write");
 
     }
 
@@ -376,18 +380,18 @@ public class ParserImpl implements Parser {
     //CmdIF	→ "if" "(" Expressao ")" ":" ListaCmd CmdIF’ 31
     public void cmdIf() throws IOException {
         if(!eat(Tag.KW_IF))
-            sintaticError("if");
+            syntacticError("if");
 
         if(!eat(Tag.ABRE_PARENTESES))
-            sintaticError("(");
+            syntacticError("(");
 
         expressao();
 
         if(!eat(Tag.FECHA_PARENTESES))
-            sintaticError(")");
+            syntacticError(")");
 
         if(!eat(Tag.DOIS_PONTOS))
-            sintaticError(":");
+            syntacticError(":");
 
         listaCmd();
 
@@ -400,7 +404,7 @@ public class ParserImpl implements Parser {
         if(eat(Tag.KW_END)){
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError(";");
+                syntacticError(";");
 
             return;
         }
@@ -408,64 +412,64 @@ public class ParserImpl implements Parser {
         if(eat(Tag.KW_ELSE)){
 
             if(!eat(Tag.DOIS_PONTOS))
-                sintaticError(":");
+                syntacticError(":");
 
             listaCmd();
 
             if(!eat(Tag.KW_END))
-                sintaticError("end");
+                syntacticError("end");
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError(";");
+                syntacticError(";");
 
         }
 
         else
-            sintaticError("end, else");
+            syntacticError("end, else");
     }
 
     @Override
     //CmdWhile	→ "while" "(" Expressao ")" ":" ListaCmd "end" ";" 34
     public void cmdWhile() throws IOException {
         if(!eat(Tag.KW_WHILE))
-            sintaticError("while");
+            syntacticError("while");
 
         if(!eat(Tag.ABRE_PARENTESES))
-            sintaticError("(");
+            syntacticError("(");
 
         expressao();
 
         if(!eat(Tag.FECHA_PARENTESES))
-            sintaticError(")");
+            syntacticError(")");
 
         if(!eat(Tag.DOIS_PONTOS))
-            sintaticError(":");
+            syntacticError(":");
 
         listaCmd();
 
         if(!eat(Tag.KW_END))
-            sintaticError("end");
+            syntacticError("end");
 
         if(!eat(Tag.PONTO_VIRGULA))
-            sintaticError(";");
+            syntacticError(";");
     }
 
     @Override
     //CmdWrite	→ "write" "(" Expressao ")" ";" 35
     public void cmdWrite() throws IOException {
         if(!eat(Tag.KW_WRITE))
-            sintaticError("write");
+            syntacticError("write");
 
         if(!eat(Tag.ABRE_PARENTESES))
-            sintaticError("(");
+            syntacticError("(");
 
         expressao();
 
         if(!eat(Tag.FECHA_PARENTESES))
-            sintaticError(")");
+            syntacticError(")");
 
         if(!eat(Tag.PONTO_VIRGULA))
-            sintaticError(";");
+            syntacticError(";");
 
     }
 
@@ -473,27 +477,27 @@ public class ParserImpl implements Parser {
     //CmdAtribui → "=" Expressao ";" 36
     public void cmdAtribui() throws IOException {
         if(!eat(Tag.OP_IGUAL))
-            sintaticError("=");
+            syntacticError("=");
 
         expressao();
 
         if(!eat(Tag.PONTO_VIRGULA))
-            sintaticError(";");
+            syntacticError(";");
     }
 
     @Override
     //CmdFuncao	→ "(" RegexExp ")" ";" 37
     public void cmdFuncao() throws IOException {
         if(!eat(Tag.ABRE_PARENTESES))
-            sintaticError("(");
+            syntacticError("(");
 
         regexExp();
 
         if(!eat(Tag.FECHA_PARENTESES))
-            sintaticError(")");
+            syntacticError(")");
 
         if(!eat(Tag.PONTO_VIRGULA))
-            sintaticError(";");
+            syntacticError(";");
     }
 
     @Override
@@ -526,7 +530,7 @@ public class ParserImpl implements Parser {
         }
 
         if(!isNext(Tag.FECHA_PARENTESES))
-            sintaticError(")", ",");
+            syntacticError(")", ",");
     }
 
     @Override
@@ -594,7 +598,7 @@ public class ParserImpl implements Parser {
         }
 
          if(!isNext(Tag.PONTO_VIRGULA, Tag.FECHA_PARENTESES, Tag.VIRGULA, Tag.OP_OR, Tag.OP_AND))
-            sintaticError("<", "<=", ">", ">=", ",", "or", "and", "==", "!=");
+            syntacticError("<", "<=", ">", ">=", ",", "or", "and", "==", "!=");
     }
 
     @Override
@@ -695,13 +699,13 @@ public class ParserImpl implements Parser {
             expressao();
 
             if(!eat(Tag.FECHA_PARENTESES))
-                sintaticError(")");
+                syntacticError(")");
 
             return;
         }
         //63 //64 //65 //66 //67
         if(!eat(Tag.CONST_INT, Tag.CONST_DOUBLE, Tag.CONST_STRING, Tag.KW_TRUE, Tag.KW_FALSE)){
-            sintaticError("ID", "constInt", "constDouble", "constStr", "true", "false", "!", "-n", "(");
+            syntacticError("ID", "constInt", "constDouble", "constStr", "true", "false", "!", "-n", "(");
         }
     }
 
@@ -714,7 +718,7 @@ public class ParserImpl implements Parser {
             regexExp();
 
             if(!eat(Tag.FECHA_PARENTESES))
-                sintaticError(")");
+                syntacticError(")");
 
             return;
         }
