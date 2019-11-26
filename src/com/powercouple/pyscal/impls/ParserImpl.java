@@ -1,5 +1,6 @@
 package com.powercouple.pyscal.impls;
 
+import com.powercouple.pyscal.No;
 import com.powercouple.pyscal.Parser;
 import com.powercouple.pyscal.Tag;
 import com.powercouple.pyscal.Token;
@@ -10,6 +11,8 @@ public class ParserImpl implements Parser {
 
     private LexerImpl lexerImpl;
     private Token token;
+
+    private Token tempToken;
 
     public ParserImpl(LexerImpl lexerImpl) throws IOException {
         this.lexerImpl = lexerImpl;
@@ -38,7 +41,9 @@ public class ParserImpl implements Parser {
 
     private void skip(String... esperados) throws IOException {
         this.syntacticError(esperados);
-        this.advance();
+        if(!token.getName().equals(Tag.EOF.toString())){
+            this.advance();
+        }
     }
 
     private boolean eat(Tag... token) throws IOException {
@@ -68,8 +73,11 @@ public class ParserImpl implements Parser {
     public void classe() throws IOException {
         //2
         if (eat(Tag.KW_CLASS)) {
+            Token tempToken = new Token(token.getName(), token.getLexeme(), token.getLine(), token.getColumn());
             if (!eat(Tag.ID))
                 syntacticError("ID");
+
+            lexerImpl.getSt().setType(tempToken.getLexeme(), Tag.EMPTY);
 
             if (!eat(Tag.DOIS_PONTOS))
                 syntacticError(":");
@@ -678,9 +686,17 @@ public class ParserImpl implements Parser {
     //Exp4	→ ID Exp4’ 62 | ConstInteger 63 | ConstDouble 64 | ConstString 65 |
     // "true" 66 | "false" 67 | OpUnario Exp4 68 | "(" Expressao")" 69
     public void exp4() throws IOException {
+        tempToken = new Token(token.getName(), token.getLexeme(), token.getLine(), token.getColumn());
         //62
         if(eat(Tag.ID)){
             exp4_();
+
+            No noExp4 = new No();
+            noExp4.setTipo(lexerImpl.getSt().getType(tempToken.getLexeme()));
+
+            if(noExp4.getTipo() == null){
+                noExp4.setTipo(Tag.ERROR);
+            }
 
             return;
         }
@@ -733,10 +749,29 @@ public class ParserImpl implements Parser {
 
     @Override
     //OpUnario	→ "-" 72 | "!" 73
-    public void opUnario() throws IOException {
+    public No opUnario() throws IOException {
         //72 //73
-        if(!eat(Tag.OPUNARIO_NEGATIVO, Tag.OPUNARIO_NEGACAO))
-            skip("-n", "!");
+        No noOpUnario = new No();
+//        if(!eat(Tag.OPUNARIO_NEGATIVO, Tag.OPUNARIO_NEGACAO))
+
+        if(token.getName().equals(Tag.OPUNARIO_NEGATIVO.toString())){
+            noOpUnario.setTipo(Tag.NUMERICO);
+            eat(Tag.OPUNARIO_NEGATIVO);
+        }
+
+        else if(token.getName().equals(Tag.OPUNARIO_NEGACAO.toString())) {
+            noOpUnario.setTipo(Tag.LOGIC);
+            eat(Tag.OPUNARIO_NEGACAO);
+        }
+
+        else {
+            syntacticError("!", "-n");
+            if (!isNext(Tag.ID, Tag.CONST_STRING, Tag.CONST_DOUBLE, Tag.CONST_INT, Tag.KW_TRUE, Tag.KW_FALSE, Tag.ABRE_PARENTESES)) {
+                skip("-n", "!");
+
+            }
+        }
+        return noOpUnario;
     }
 
     @Override
@@ -754,10 +789,10 @@ public class ParserImpl implements Parser {
     }
 
     private String printWaitedTokens(String[] tokens){
-        String formattedString = "";
+        StringBuilder formattedString = new StringBuilder();
         for(String t : tokens){
-            formattedString += "[" + t + "]";
+            formattedString.append("[").append(t).append("]");
         }
-        return formattedString;
+        return formattedString.toString();
     }
 }

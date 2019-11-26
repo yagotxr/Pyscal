@@ -5,10 +5,14 @@ public class No {
     private Tag tipo;
 
     public No(){
-        this.tipo = Tag.TIPO_VAZIO;
+        this.tipo = Tag.EMPTY;
     }
 
     public Tag getTipo() {
         return tipo;
+    }
+
+    public void setTipo(Tag numerico) {
+        this.tipo = numerico;
     }
 }

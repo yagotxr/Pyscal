@@ -58,6 +58,9 @@ public enum Tag {
     ABRE_COLCHETE, // [
     FECHA_COLCHETE, // ]
 
-
-    TIPO_VAZIO
+    //Constant Types
+    EMPTY,
+    NUMERICO,
+    LOGIC,
+    ERROR;
 }

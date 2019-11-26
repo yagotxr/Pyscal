@@ -1,9 +1,10 @@
 package com.powercouple.pyscal;
 
-public class Token {
+public class Token implements Cloneable{
 
     private String name, lexeme;
     private  long line, column;
+    private Tag type;
 
     public Token(String name, String lexeme, long line, long column) {
         this.name = name;
@@ -38,5 +39,13 @@ public class Token {
 
     public void setColumn(long column) {
         this.column = column;
+    }
+
+    public void setType(Tag type) {
+        this.type = type;
+    }
+
+    public Tag getType() {
+        return type;
     }
 }

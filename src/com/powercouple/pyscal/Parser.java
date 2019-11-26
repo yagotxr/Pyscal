@@ -41,7 +41,7 @@ public interface Parser {
     void exp3_() throws IOException;
     void exp4() throws IOException;
     void exp4_() throws IOException;
-    void opUnario() throws IOException;
+    No opUnario() throws IOException;
     LexerImpl getLexerImpl();
 
 }

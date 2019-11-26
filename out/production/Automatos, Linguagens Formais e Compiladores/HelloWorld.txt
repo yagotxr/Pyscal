@@ -4,7 +4,7 @@
   		return (true == dizQueSim);
   	end;
 
-  		defstatic void main(String[] args):
+  		defstatic (String[] args):
   		write("Caros alunos de Compiladores,");
   		#	write("");
 
