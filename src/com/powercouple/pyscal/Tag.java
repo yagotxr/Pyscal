@@ -62,5 +62,6 @@ public enum Tag {
     EMPTY,
     NUMERICO,
     LOGIC,
-    ERROR;
+    ERROR,
+    STRING;
 }

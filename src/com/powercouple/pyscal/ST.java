@@ -50,8 +50,8 @@ public class ST {
         simbolTable.forEach((key, value) -> System.out.println(key + " : " + value.toString()));
     }
 
-    public void setType(String tokenName, Tag type){
-        this.simbolTable.get(tokenName).setType(type);
+    public void setType(String lexeme, Tag type){
+        this.simbolTable.get(lexeme).setType(type);
     }
 
     public Tag getType(String lexeme) {

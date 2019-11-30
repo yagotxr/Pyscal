@@ -12,7 +12,7 @@ public class No {
         return tipo;
     }
 
-    public void setTipo(Tag numerico) {
-        this.tipo = numerico;
+    public void setTipo(Tag tag) {
+        this.tipo = tag;
     }
 }
