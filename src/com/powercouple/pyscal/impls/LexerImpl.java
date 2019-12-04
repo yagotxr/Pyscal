@@ -10,9 +10,9 @@ import java.util.Optional;
 
 public class LexerImpl implements Lexer {
 
-    private static String filePath = "/Users/yagohenrique/Google Drive/College/6º Periodo/Automatos, Linguagens Formais e Compiladores/Pyscal/src/";
+//    private static String filePath = "/Users/yagohenrique/Google Drive/College/6º Periodo/Automatos, Linguagens Formais e Compiladores/Pyscal/src/";
 //    private static String filePath = "/home/carolinne/Pyscal/src/";
-//    private static String filePath = "/home/yagoteixeira/Documents/Pyscal/src/";
+    private static String filePath = "/home/yagoteixeira/Documents/Pyscal/src/";
 //        private static String filePath = "/home/carolinne/IdeaProjects/Pyscal/src/";
 
 
@@ -388,6 +388,10 @@ public class LexerImpl implements Lexer {
                 "\nPlease check if file exists or path is correct: " +
                 "\nFilePath: " + PATHNAME);
         System.exit(0);
+    }
+
+    public ST getSt() {
+        return st;
     }
 }
 

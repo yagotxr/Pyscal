@@ -57,4 +57,11 @@ public enum Tag {
     FECHA_PARENTESES, // )
     ABRE_COLCHETE, // [
     FECHA_COLCHETE, // ]
+
+    //Constant Types
+    EMPTY,
+    NUMERICO,
+    LOGIC,
+    ERROR,
+    STRING;
 }
