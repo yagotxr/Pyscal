@@ -34,19 +34,27 @@ public class ST {
         this.simbolTable.put("and", new Token(Tag.OP_AND.toString(), "and", 0, 0));
     }
 
-    public Optional<Token> getToken(String lexema){
-        Token foundToken = simbolTable.get(lexema);
+    public Optional<Token> getToken(String lexeme){
+        Token foundToken = simbolTable.get(lexeme);
         if(foundToken == null){
             return Optional.empty();
         }
-        return Optional.of(simbolTable.get(lexema));
+        return Optional.of(simbolTable.get(lexeme));
     }
 
-    public void addToken(String lexema, Token token){
-        this.simbolTable.put(lexema, token);
+    public void addToken(String lexeme, Token token){
+        this.simbolTable.put(lexeme, token);
     }
 
     public void printST(){
         simbolTable.forEach((key, value) -> System.out.println(key + " : " + value.toString()));
+    }
+
+    public void setType(String lexeme, Tag type){
+        this.simbolTable.get(lexeme).setType(type);
+    }
+
+    public Tag getType(String lexeme) {
+        return this.simbolTable.get(lexeme).getType();
     }
 }

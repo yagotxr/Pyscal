@@ -60,8 +60,8 @@ public enum Tag {
 
     //Constant Types
     EMPTY,
+    NUMERICO,
     LOGIC,
-    INT,
-    DOUBLE,
-    ERROR
+    ERROR,
+    STRING;
 }

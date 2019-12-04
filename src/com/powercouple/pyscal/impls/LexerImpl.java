@@ -389,6 +389,10 @@ public class LexerImpl implements Lexer {
                 "\nFilePath: " + PATHNAME);
         System.exit(0);
     }
+
+    public ST getSt() {
+        return st;
+    }
 }
 
 

@@ -1,30 +1,32 @@
 package com.powercouple.pyscal.impls;
 
+import com.powercouple.pyscal.No;
 import com.powercouple.pyscal.Parser;
 import com.powercouple.pyscal.Tag;
 import com.powercouple.pyscal.Token;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class ParserImpl implements Parser {
 
     private LexerImpl lexerImpl;
     private Token token;
 
+    private Token tempToken;
+
     public ParserImpl(LexerImpl lexerImpl) throws IOException {
         this.lexerImpl = lexerImpl;
         this.token = lexerImpl.nextToken().orElseThrow(() -> new RuntimeException("Token not found"));
     }
 
-    private void semanticError(String message){
-        System.out.print(">>>>>>>>>>>>>>>>>>>[Erro Semantico] Error:(" + token.getLine() + "," + token.getColumn() + ") ");
-        System.out.println(message);
-    }
-
-    private void sintaticError(String... esperados){
+    private void syntacticError(String... esperados){
         System.out.print(">>>>>>>>>>>>>>>>>>>[Erro Sintatico] Error:(" + token.getLine() + "," + token.getColumn() + ") ");
         System.out.println("Esperado: " + printWaitedTokens(esperados) + "\"; encontrado " + "\"" + token.getName() + "\"" + "\n");
+    }
+
+    private void semanticError(String msg){
+        System.out.print(">>>>>>>>>>>>>>>>>>>[Erro Semantico] Error:(" + token.getLine() + "," + token.getColumn() + ") ");
+        System.out.println(msg);
     }
 
     private void advance() throws IOException {
@@ -38,8 +40,10 @@ public class ParserImpl implements Parser {
     }
 
     private void skip(String... esperados) throws IOException {
-        this.sintaticError(esperados);
-        this.advance();
+        this.syntacticError(esperados);
+        if(!token.getName().equals(Tag.EOF.toString())){
+            this.advance();
+        }
     }
 
     private boolean eat(Tag... token) throws IOException {
@@ -61,7 +65,11 @@ public class ParserImpl implements Parser {
             classe();
 
         if(!eat(Tag.EOF))
-            sintaticError("EOF");
+            syntacticError("EOF");
+    }
+
+    private void copyToken(){
+        tempToken = new Token(token.getName(), token.getLexeme(), token.getLine(), token.getColumn());
     }
 
     //Classe → "class" ID ":" ListaFuncao Main "end" "." 2
@@ -69,37 +77,45 @@ public class ParserImpl implements Parser {
     public void classe() throws IOException {
         //2
         if (eat(Tag.KW_CLASS)) {
+            copyToken();
             if (!eat(Tag.ID))
-                sintaticError("ID");
+                syntacticError("ID");
+
+            lexerImpl.getSt().setType(tempToken.getLexeme(), Tag.EMPTY);
 
             if (!eat(Tag.DOIS_PONTOS))
-                sintaticError(":");
+                syntacticError(":");
 
             listaFuncao();
             main();
 
             if (!eat(Tag.KW_END))
-                sintaticError("end");
+                syntacticError("end");
 
             if (!eat(Tag.PONTO))
-                sintaticError(".");
+                syntacticError(".");
 
         } else
-            sintaticError("class");
+            syntacticError("class");
     }
 
     @Override
     //DeclaraID	→ TipoPrimitivo ID ";" 3
     public void declaraId() throws IOException {
+
         if(isNext(Tag.KW_VOID, Tag.KW_STRING, Tag.KW_BOOL, Tag.KW_INTEGER, Tag.KW_DOUBLE)){
 
-            tipoPrimitivo();
+            No noTipoPrimitivo = tipoPrimitivo();
 
-            if(!eat(Tag.ID))
-                sintaticError("ID");
+            copyToken();
+            if(!eat(Tag.ID)){
+                syntacticError("ID");
+            }
+
+            lexerImpl.getSt().setType(tempToken.getLexeme(), noTipoPrimitivo.getType());
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError(";");
+                syntacticError(";");
 
         } else
             skip("void", "String", "bool", "int", "double", "ID", ";");
@@ -133,39 +149,47 @@ public class ParserImpl implements Parser {
     @Override
     //Funcao → "def" TipoPrimitivo ID "(" ListaArg ")" ":" RegexDeclaraId ListaCmd Retorno "end" ";" 7
     public void funcao() throws IOException {
+
         if(eat(Tag.KW_DEF)){
 
-            tipoPrimitivo();
+            No noTipoPrimitivo = tipoPrimitivo();
 
+            copyToken();
             if(!eat(Tag.ID))
-                sintaticError("ID");
+                syntacticError("ID");
+
+            lexerImpl.getSt().setType(tempToken.getLexeme(), noTipoPrimitivo.getType());
 
             if(!eat(Tag.ABRE_PARENTESES))
-                sintaticError("(");
+                syntacticError("(");
 
             listaArg();
 
             if(!eat(Tag.FECHA_PARENTESES))
-                sintaticError(")");
+                syntacticError(")");
 
             if(!eat(Tag.DOIS_PONTOS))
-                sintaticError(":");
+                syntacticError(":");
 
             regexDeclaraId();
 
             listaCmd();
 
-            retorno();
+            No noRetorno = retorno();
+
+            if(noRetorno.getType() != noTipoPrimitivo.getType()){
+                semanticError("Retorno incompativel");
+            }
 
             if(!eat(Tag.KW_END))
-                sintaticError("end");
+                syntacticError("end");
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError(";");
+                syntacticError(";");
         }
 
         else {
-            sintaticError("def");
+            syntacticError("def");
         }
     }
 
@@ -219,11 +243,16 @@ public class ParserImpl implements Parser {
     public void arg() throws IOException {
         if(isNext(Tag.KW_VOID, Tag.KW_STRING, Tag.KW_BOOL, Tag.KW_INTEGER, Tag.KW_DOUBLE)){
 
-            tipoPrimitivo();
+            No noTipoPrimitivo = tipoPrimitivo();
 
+            copyToken();
             if(!eat(Tag.ID))
-                sintaticError("ID");
+                syntacticError("ID");
+
+            lexerImpl.getSt().setType(tempToken.getLexeme(), noTipoPrimitivo.getType());
+
         }
+
 
         else {
             skip("void", "String", "bool", "integer", "double");
@@ -232,19 +261,25 @@ public class ParserImpl implements Parser {
 
     @Override
     //Retorno	→ "return" Expressao ";" 14 | ε 15
-    public void retorno() throws IOException {
+    public No retorno() throws IOException {
+        No noRetorno = new No();
         if(eat(Tag.KW_RETURN)){
 
-            expressao();
+            No noExpressao = expressao();
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError(";");
-            return;
+                syntacticError(";");
+
+            noRetorno.setType(noExpressao.getType());
+
+            return noRetorno;
         }
 
         if(!isNext(Tag.KW_END)){
             skip("void", "String", "bool", "integer", "double");
         }
+
+        return noRetorno;
     }
 
     @Override
@@ -253,41 +288,44 @@ public class ParserImpl implements Parser {
         if(eat(Tag.KW_DEFSTATIC)){
 
             if(!eat(Tag.KW_VOID))
-                sintaticError("void");
+                syntacticError("void");
 
             if(!eat(Tag.KW_MAIN))
-                sintaticError("main");
+                syntacticError("main");
 
             if(!eat(Tag.ABRE_PARENTESES))
-                sintaticError("(");
+                syntacticError("(");
 
             if(!eat(Tag.KW_STRING))
-                sintaticError("String");
+                syntacticError("String");
 
             if(!eat(Tag.ABRE_COLCHETE))
-                sintaticError("[");
+                syntacticError("[");
 
             if(!eat(Tag.FECHA_COLCHETE))
-                sintaticError("]");
+                syntacticError("]");
 
+            copyToken();
             if(!eat(Tag.ID))
-                sintaticError("ID");
+                syntacticError("ID");
+
+            lexerImpl.getSt().setType(tempToken.getLexeme(), Tag.STRING);
 
             if(!eat(Tag.FECHA_PARENTESES))
-                sintaticError(")");
+                syntacticError(")");
 
             if(!eat(Tag.DOIS_PONTOS))
-                sintaticError(":");
+                syntacticError(":");
 
             regexDeclaraId();
 
             listaCmd();
 
             if(!eat(Tag.KW_END))
-                sintaticError("end");
+                syntacticError("end");
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError(";");
+                syntacticError(";");
 
         }
 
@@ -298,9 +336,38 @@ public class ParserImpl implements Parser {
 
     @Override
     //TipoPrimitivo → "bool" 17 | "integer" 18 | "String" 19 | "double" 20 | "void" 21
-    public void tipoPrimitivo() throws IOException {
-        if(!eat(Tag.KW_BOOL, Tag.KW_INTEGER, Tag.KW_STRING, Tag.KW_DOUBLE, Tag.KW_VOID))
-            sintaticError("bool", "integer", "String", "double", "void");
+    public No tipoPrimitivo() throws IOException {
+        No noTipoPrimitivo = new No();
+
+        if(eat(Tag.KW_BOOL)){
+            noTipoPrimitivo.setType(Tag.LOGIC);
+            return noTipoPrimitivo;
+        }
+
+        if(eat(Tag.KW_INTEGER)){
+            noTipoPrimitivo.setType(Tag.NUMERICO);
+            return noTipoPrimitivo;
+        }
+
+        if(eat(Tag.KW_STRING)){
+            noTipoPrimitivo.setType(Tag.STRING);
+            return noTipoPrimitivo;
+        }
+
+        if(eat(Tag.KW_DOUBLE)){
+            noTipoPrimitivo.setType(Tag.NUMERICO);
+            return noTipoPrimitivo;
+        }
+
+        if(eat(Tag.KW_VOID)){
+            noTipoPrimitivo.setType(Tag.EMPTY);
+            return noTipoPrimitivo;
+        }
+
+        else {
+            syntacticError("bool", "integer", "String", "double", "void");
+            return noTipoPrimitivo;
+        }
     }
 
     @Override
@@ -334,8 +401,18 @@ public class ParserImpl implements Parser {
     @Override
     //Cmd → CmdIF 25 | CmdWhile 26 | ID CmdAtribFunc 27 | CmdWrite 28
     public void cmd() throws IOException {
+        copyToken();
         if(eat(Tag.ID)){
-            cmdAttibFunc();
+            if(lexerImpl.getSt().getType(tempToken.getLexeme()) == null){
+                semanticError("ID não declarado");
+            }
+
+            No noCmdAtribFunc = cmdAtribFunc();
+
+            if(noCmdAtribFunc.getType() != Tag.EMPTY &&
+                    lexerImpl.getSt().getType(tempToken.getLexeme()) != noCmdAtribFunc.getType()){
+                semanticError("Atribuiçao Incompativel");
+            }
             return;
         }
 
@@ -356,43 +433,55 @@ public class ParserImpl implements Parser {
         }
 
         else
-            sintaticError("ID", "if", "while", "write");
+            syntacticError("ID", "if", "while", "write");
 
     }
 
     @Override
     //CmdAtribFunc → CmdAtribui 29 | CmdFuncao 30
-    public void cmdAttibFunc() throws IOException {
+    public No cmdAtribFunc() throws IOException {
+
+        No noCmdAtribFunc = new No();
+
         if(isNext(Tag.ABRE_PARENTESES)){
             cmdFuncao();
-            return;
+            noCmdAtribFunc.setType(Tag.EMPTY);
+            return noCmdAtribFunc;
         }
 
         if(isNext(Tag.OP_IGUAL)){
-            cmdAtribui();
+            No noCmdAtribui = cmdAtribui();
+            noCmdAtribFunc.setType(noCmdAtribui.getType());
+            return noCmdAtribFunc;
         }
 
         else {
             skip("(", "=");
         }
+
+        return noCmdAtribFunc;
     }
 
     @Override
     //CmdIF	→ "if" "(" Expressao ")" ":" ListaCmd CmdIF’ 31
     public void cmdIf() throws IOException {
         if(!eat(Tag.KW_IF))
-            sintaticError("if");
+            syntacticError("if");
 
         if(!eat(Tag.ABRE_PARENTESES))
-            sintaticError("(");
+            syntacticError("(");
 
-        expressao();
+        No noExpressao = expressao();
 
         if(!eat(Tag.FECHA_PARENTESES))
-            sintaticError(")");
+            syntacticError(")");
+
+        if(noExpressao.getType() != Tag.LOGIC){
+            semanticError("Tipo esperado: LOGIC");
+        }
 
         if(!eat(Tag.DOIS_PONTOS))
-            sintaticError(":");
+            syntacticError(":");
 
         listaCmd();
 
@@ -405,7 +494,7 @@ public class ParserImpl implements Parser {
         if(eat(Tag.KW_END)){
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError(";");
+                syntacticError(";");
 
             return;
         }
@@ -413,92 +502,107 @@ public class ParserImpl implements Parser {
         if(eat(Tag.KW_ELSE)){
 
             if(!eat(Tag.DOIS_PONTOS))
-                sintaticError(":");
+                syntacticError(":");
 
             listaCmd();
 
             if(!eat(Tag.KW_END))
-                sintaticError("end");
+                syntacticError("end");
 
             if(!eat(Tag.PONTO_VIRGULA))
-                sintaticError(";");
+                syntacticError(";");
 
         }
 
         else
-            sintaticError("end, else");
+            syntacticError("end, else");
     }
 
     @Override
     //CmdWhile	→ "while" "(" Expressao ")" ":" ListaCmd "end" ";" 34
     public void cmdWhile() throws IOException {
         if(!eat(Tag.KW_WHILE))
-            sintaticError("while");
+            syntacticError("while");
 
         if(!eat(Tag.ABRE_PARENTESES))
-            sintaticError("(");
+            syntacticError("(");
 
-        expressao();
+        No noExpressao = expressao();
 
         if(!eat(Tag.FECHA_PARENTESES))
-            sintaticError(")");
+            syntacticError(")");
+
+        if(noExpressao.getType() != Tag.LOGIC){
+            semanticError("Tipo esperado: LOGIC");
+        }
 
         if(!eat(Tag.DOIS_PONTOS))
-            sintaticError(":");
+            syntacticError(":");
 
         listaCmd();
 
         if(!eat(Tag.KW_END))
-            sintaticError("end");
+            syntacticError("end");
 
         if(!eat(Tag.PONTO_VIRGULA))
-            sintaticError(";");
+            syntacticError(";");
     }
 
     @Override
     //CmdWrite	→ "write" "(" Expressao ")" ";" 35
     public void cmdWrite() throws IOException {
         if(!eat(Tag.KW_WRITE))
-            sintaticError("write");
+            syntacticError("write");
 
         if(!eat(Tag.ABRE_PARENTESES))
-            sintaticError("(");
+            syntacticError("(");
 
-        expressao();
+        No noExpressao = expressao();
 
         if(!eat(Tag.FECHA_PARENTESES))
-            sintaticError(")");
+            syntacticError(")");
+
+        if(noExpressao.getType() != Tag.STRING){
+            semanticError("Tipo esperado: STRING");
+        }
 
         if(!eat(Tag.PONTO_VIRGULA))
-            sintaticError(";");
+            syntacticError(";");
 
     }
 
     @Override
     //CmdAtribui → "=" Expressao ";" 36
-    public void cmdAtribui() throws IOException {
-        if(!eat(Tag.OP_IGUAL))
-            sintaticError("=");
+    public No cmdAtribui() throws IOException {
 
-        expressao();
+        No noCmdAtribui = new No();
+
+        if(!eat(Tag.OP_IGUAL))
+            syntacticError("=");
+
+        No noExpressao = expressao();
 
         if(!eat(Tag.PONTO_VIRGULA))
-            sintaticError(";");
+            syntacticError(";");
+
+        noCmdAtribui.setType(noExpressao.getType());
+
+        return noCmdAtribui;
     }
 
     @Override
     //CmdFuncao	→ "(" RegexExp ")" ";" 37
     public void cmdFuncao() throws IOException {
         if(!eat(Tag.ABRE_PARENTESES))
-            sintaticError("(");
+            syntacticError("(");
 
         regexExp();
 
         if(!eat(Tag.FECHA_PARENTESES))
-            sintaticError(")");
+            syntacticError(")");
 
         if(!eat(Tag.PONTO_VIRGULA))
-            sintaticError(";");
+            syntacticError(";");
     }
 
     @Override
@@ -531,141 +635,248 @@ public class ParserImpl implements Parser {
         }
 
         if(!isNext(Tag.FECHA_PARENTESES))
-            sintaticError(")", ",");
+            syntacticError(")", ",");
     }
 
     @Override
     //Expressao	→ Exp1 Exp’ 42
-    public void expressao() throws IOException {
-        if(isNext(Tag.ID, Tag.CONST_INT, Tag.CONST_DOUBLE, Tag.CONST_STRING, Tag.KW_TRUE, Tag.KW_FALSE, Tag.ABRE_PARENTESES, Tag.OPUNARIO_NEGACAO, Tag.OPUNARIO_NEGATIVO)){
-            exp1();
+    public No expressao() throws IOException {
 
-            exp_();
+        No noExp = new No();
+
+        if(isNext(Tag.ID, Tag.CONST_INT, Tag.CONST_DOUBLE, Tag.CONST_STRING, Tag.KW_TRUE, Tag.KW_FALSE, Tag.ABRE_PARENTESES, Tag.OPUNARIO_NEGACAO, Tag.OPUNARIO_NEGATIVO)){
+            No noExp1 = exp1();
+
+            No noExp_ = exp_();
+
+            if(noExp_.getType() == Tag.EMPTY){
+                noExp.setType(noExp1.getType());
+            }
+            else if(noExp_.getType() == noExp1.getType() &&
+                    noExp_.getType() == Tag.LOGIC){
+                noExp.setType(Tag.LOGIC);
+            } else {
+                noExp_.setType(Tag.ERROR);
+            }
+
+            return noExp;
         }
+
+
 
         else {
             skip("ID", "integer", "double", "String", "true", "false", "(", "!", "-");
         }
+
+        return noExp;
     }
 
     @Override
     //Exp’ → "or" Exp1 Exp’ 43 | "and" Exp1 Exp’ 44 | ε 45
-    public void exp_() throws IOException {
+    public No exp_() throws IOException {
+
+        No noExp_ = new No();
+
         //43 // 44
         if(eat(Tag.OP_OR, Tag.OP_AND)){
 
-            exp1();
+            No noExp1 = exp1();
 
-            exp_();
+            No noExp_Filho = exp_();
 
-            return;
+            if(noExp_Filho.getType() == Tag.EMPTY && noExp1.getType() == Tag.LOGIC){
+                noExp_.setType(Tag.LOGIC);
+            } else if(noExp_Filho.getType() == noExp1.getType() && noExp1.getType() == Tag.LOGIC ){
+                noExp_.setType(Tag.LOGIC);
+            } else {
+                noExp_.setType(Tag.ERROR);
+            }
+            return noExp_;
         }
         //45
         if(!isNext(Tag.PONTO_VIRGULA, Tag.FECHA_PARENTESES, Tag.VIRGULA)){
             skip("or", "and", ";", ")", ",");
         }
+        return noExp_;
     }
 
     @Override
     //Exp1	→ Exp2 Exp1’ 46
-    public void exp1() throws IOException {
+    public No exp1() throws IOException {
+
+        No noExp1 = new No();
+
         //46
         if(isNext(Tag.ID, Tag.ABRE_PARENTESES, Tag.CONST_INT, Tag.CONST_DOUBLE,
                 Tag.CONST_STRING, Tag.KW_TRUE, Tag.KW_FALSE, Tag.OPUNARIO_NEGATIVO,
                 Tag.OPUNARIO_NEGACAO)){
 
-            exp2();
+            No noExp2 = exp2();
 
-            exp1_();
+            No noExp1_ = exp1_();
+
+            if(noExp1_.getType() == Tag.EMPTY){
+                noExp1.setType(noExp2.getType());
+            } else if(noExp1_.getType() == noExp2.getType() && noExp1_.getType() == Tag.NUMERICO){
+                noExp1.setType(Tag.LOGIC);
+            } else {
+                noExp1.setType(Tag.ERROR);
+            }
+            return noExp1;
         }
 
         else {
             skip("ID", "(", "consInt", "constDouble", "constStr", "true", "false", "-", "!");
         }
+
+        return noExp1;
     }
 
     @Override
     //Exp1’	→ "<" Exp2 Exp1’ 47 | "<=" Exp2 Exp1’ 48 | ">" Exp2 Exp1’ 49 |
     // ">=" Exp2 Exp1’ 50 | "==" Exp2 Exp1’ 51 | "!=" Exp2 Exp1’ 52 | ε 53
-    public void exp1_() throws IOException {
+    public No exp1_() throws IOException {
+
+        No noExp1_ = new No();
         //47
         if(eat(Tag.OP_MAIOR, Tag.OP_MAIOR_IGUAL, Tag.OP_MENOR, Tag.OP_MENOR_IGUAL, Tag.OP_COMPARACAO, Tag.OP_DIFERENTE)){
 
-            exp2();
+            No noExp2 = exp2();
 
-            exp1_();
+            No noExp1_Filho = exp1_();
 
-            return;
+            if(noExp1_Filho.getType() == Tag.EMPTY && noExp2.getType() == Tag.NUMERICO){
+                noExp1_.setType(Tag.NUMERICO);
+            } else if(noExp1_Filho.getType() == noExp2.getType() && noExp2.getType() == Tag.NUMERICO){
+                noExp1_.setType(Tag.NUMERICO);
+            } else {
+                noExp1_.setType(Tag.ERROR);
+            }
+
+            return noExp1_;
         }
 
-         if(!isNext(Tag.PONTO_VIRGULA, Tag.FECHA_PARENTESES, Tag.VIRGULA, Tag.OP_OR, Tag.OP_AND))
-            sintaticError("<", "<=", ">", ">=", ",", "or", "and", "==", "!=");
+        if(!isNext(Tag.PONTO_VIRGULA, Tag.FECHA_PARENTESES, Tag.VIRGULA, Tag.OP_OR, Tag.OP_AND))
+            syntacticError("<", "<=", ">", ">=", ",", "or", "and", "==", "!=");
+
+        return noExp1_;
     }
 
     @Override
     //Exp2	→ Exp3 Exp2’ 54
-    public void exp2() throws IOException {
+    public No exp2() throws IOException {
+
+        No noExp2 = new No();
         //54
         if(isNext(Tag.ID, Tag.ABRE_PARENTESES, Tag.CONST_INT, Tag.CONST_DOUBLE, Tag.CONST_STRING, Tag.KW_TRUE,
-                Tag.KW_FALSE, Tag.OPUNARIO_NEGACAO, Tag.OPUNARIO_NEGATIVO)){
+                Tag.KW_FALSE, Tag.OPUNARIO_NEGACAO, Tag.OPUNARIO_NEGATIVO)) {
 
-            exp3();
+            No noExp3 = exp3();
 
-            exp2_();
+            No noExp2_ = exp2_();
 
+            if (noExp2_.getType() == Tag.EMPTY) {
+                noExp2.setType(noExp3.getType());
+            } else if (noExp2_.getType() == noExp3.getType() && noExp2_.getType() == Tag.NUMERICO) {
+                noExp2.setType(Tag.NUMERICO);
+            } else {
+                noExp2.setType(Tag.ERROR);
+            }
+            return noExp2;
         }
 
         else {
             skip("ID", "(", "consInt", "constDouble", "constStr", "true", "false", "-", "!");
         }
+
+        return noExp2;
     }
 
     @Override
     //Exp2’	→ "+" Exp3 Exp2’ 55 | "-" Exp3 Exp2’ 56 | ε 57
-    public void exp2_() throws IOException {
+    public No exp2_() throws IOException {
+
+        No noExp2_ = new No();
+
         //55 // 56
         if(eat(Tag.OP_SOMA, Tag.OP_SUBTRACAO)) {
 
-            exp3();
+            No noExp3 = exp3();
 
-            exp2_();
+            No noExp2_Filho = exp2_();
 
-            return;
+            if(noExp2_Filho.getType() == Tag.EMPTY && noExp3.getType() == Tag.NUMERICO){
+                noExp2_.setType(Tag.NUMERICO);
+            } else if(noExp2_Filho.getType() == noExp3.getType() && noExp3.getType() == Tag.NUMERICO){
+                noExp2_.setType(Tag.NUMERICO);
+            } else {
+                noExp3.setType(Tag.ERROR);
+            }
+
+            return noExp2_;
         }
 
         if(!isNext(Tag.PONTO_VIRGULA, Tag.FECHA_PARENTESES, Tag.VIRGULA, Tag.OP_OR, Tag.OP_AND, Tag.OP_MAIOR, Tag.OP_MAIOR_IGUAL,
                 Tag.OP_MENOR, Tag.OP_MENOR_IGUAL, Tag.OP_COMPARACAO, Tag.OP_DIFERENTE)){
             skip("+", "-", ";", ")", ",", "or", "and", "<", "<=", ">", ">=", "==", "!=");
         }
+
+        return noExp2_;
     }
 
     @Override
     //Exp3	→ Exp4 Exp3’ 58
-    public void exp3() throws IOException {
+    public No exp3() throws IOException {
+
+        No noExp3 = new No();
+
         //58
         if(isNext(Tag.ID, Tag.ABRE_PARENTESES, Tag.CONST_INT, Tag.CONST_DOUBLE, Tag.CONST_STRING, Tag.KW_TRUE, Tag.KW_FALSE,
                 Tag.OPUNARIO_NEGACAO, Tag.OPUNARIO_NEGATIVO)){
 
-            exp4();
+            No noExp4 = exp4();
 
-            exp3_();
+            No noExp3_ = exp3_();
+
+            if(noExp3_.getType() == Tag.EMPTY){
+                noExp3.setType(noExp4.getType());
+            } else if (noExp3_.getType() == noExp4.getType() && noExp3_.getType() == Tag.NUMERICO){
+                noExp3.setType(Tag.NUMERICO);
+            } else {
+                noExp3.setType(Tag.ERROR);
+            }
+
+            return noExp3;
         }
 
         else {
             skip("ID", "(", "constInt", "constDouble", "constString", "true", "false", "!", "-n");
         }
+
+        return noExp3;
     }
 
     @Override
     //Exp3’	→ "*" Exp4 Exp3’ 59 | "/" Exp4 Exp3’ 60 | ε 61
-    public void exp3_() throws IOException {
+    public No exp3_() throws IOException {
+
+        No noExp3_ = new No();
+
         //59 // 60
         if(eat(Tag.OP_MULTIPLICACAO, Tag.OP_DIVISAO)){
-            exp4();
+            No noExp4 = exp4();
 
-            exp3_();
+            No noExp3_Filho = exp3_();
 
-            return;
+            if(noExp3_Filho.getType() == Tag.EMPTY && noExp4.getType() == Tag.NUMERICO){
+                noExp3_.setType(Tag.NUMERICO);
+            } else if (noExp3_Filho.getType() == noExp4.getType() && noExp4.getType() == Tag.NUMERICO){
+                noExp3_.setType(Tag.NUMERICO);
+            } else {
+                noExp3_.setType(Tag.ERROR);
+            }
+
+            return noExp3_;
 
         }
         //61
@@ -673,55 +884,91 @@ public class ParserImpl implements Parser {
                 Tag.OP_MENOR, Tag.OP_MENOR_IGUAL, Tag.OP_COMPARACAO, Tag.OP_DIFERENTE, Tag.OP_SOMA, Tag.OP_SUBTRACAO)){
             skip(";", ")", ",", "or", "and", "<", "<=", ">", ">=" , "==", "!=" , "+", "-");
         }
+
+        return noExp3_;
     }
 
     @Override
     //Exp4	→ ID Exp4’ 62 | ConstInteger 63 | ConstDouble 64 | ConstString 65 |
     // "true" 66 | "false" 67 | OpUnario Exp4 68 | "(" Expressao")" 69
-    public void exp4() throws IOException {
+    public No exp4() throws IOException {
+        No noExp4 = new No();
         //62
+        copyToken();
         if(eat(Tag.ID)){
             exp4_();
 
-            return;
+            noExp4.setType(lexerImpl.getSt().getType(tempToken.getLexeme()));
+            if(noExp4.getType() == null){
+                noExp4.setType(Tag.ERROR);
+                semanticError("ID não declarado.");
+            }
+
+            return noExp4;
+        }
+        //63 //64
+        if(eat(Tag.CONST_INT, Tag.CONST_DOUBLE)){
+            noExp4.setType(Tag.NUMERICO);
+            return noExp4;
+        }
+
+        //65
+        if(eat(Tag.CONST_STRING)){
+            noExp4.setType(Tag.STRING);
+            return noExp4;
+        }
+
+        //66 //67
+        if(eat(Tag.KW_TRUE, Tag.KW_FALSE)){
+            noExp4.setType(Tag.LOGIC);
+            return noExp4;
         }
 
         //68
-        if(eat(Tag.OPUNARIO_NEGATIVO, Tag.OPUNARIO_NEGATIVO)){
+        if(isNext(Tag.OPUNARIO_NEGATIVO, Tag.OPUNARIO_NEGATIVO)){
 
-            exp4();
+            No noOpUnario = opUnario();
 
-            return;
+            No noExp4Filho = exp4();
+
+            if(noExp4Filho.getType()== noOpUnario.getType() && noOpUnario.getType() == Tag.NUMERICO){
+                noExp4.setType(Tag.NUMERICO);
+            } else if(noExp4Filho.getType() == noOpUnario.getType() && noOpUnario.getType() == Tag.LOGIC){
+                noExp4.setType(Tag.LOGIC);
+            } else {
+                noExp4.setType(Tag.ERROR);
+            }
+
+            return noExp4;
         }
 
         //69
         if(eat(Tag.ABRE_PARENTESES)){
 
-            expressao();
+            No noExp = expressao();
 
             if(!eat(Tag.FECHA_PARENTESES))
-                sintaticError(")");
+                syntacticError(")");
 
-            return;
+            noExp4.setType(noExp.getType());
+            return noExp4;
         }
-        //63 //64 //65 //66 //67
-        if(!eat(Tag.CONST_INT, Tag.CONST_DOUBLE, Tag.CONST_STRING, Tag.KW_TRUE, Tag.KW_FALSE)){
-            sintaticError("ID", "constInt", "constDouble", "constStr", "true", "false", "!", "-n", "(");
-        }
+
+        syntacticError("ID", "constInt", "constDouble", "constStr", "true", "false", "!", "-n", "(");
+        return noExp4;
     }
 
     @Override
     //Exp4’	→ "(" RegexExp ")" 70 | ε 71
     public void exp4_() throws IOException {
+
         //70
         if(eat(Tag.ABRE_PARENTESES)){
 
             regexExp();
 
             if(!eat(Tag.FECHA_PARENTESES))
-                sintaticError(")");
-
-            return;
+                syntacticError(")");
         }
 
         //71
@@ -734,10 +981,27 @@ public class ParserImpl implements Parser {
 
     @Override
     //OpUnario	→ "-" 72 | "!" 73
-    public void opUnario() throws IOException {
+    public No opUnario() throws IOException {
+        No noOpUnario = new No();
         //72 //73
-        if(!eat(Tag.OPUNARIO_NEGATIVO, Tag.OPUNARIO_NEGACAO))
-            skip("-n", "!");
+        if(eat(Tag.OPUNARIO_NEGATIVO)){
+            noOpUnario.setType(Tag.NUMERICO);
+            return noOpUnario;
+        }
+
+        if(eat(Tag.OPUNARIO_NEGACAO)){
+            noOpUnario.setType(Tag.LOGIC);
+            return noOpUnario;
+        }
+
+        else {
+            syntacticError("!", "-n");
+            if (!isNext(Tag.ID, Tag.CONST_STRING, Tag.CONST_DOUBLE, Tag.CONST_INT, Tag.KW_TRUE, Tag.KW_FALSE, Tag.ABRE_PARENTESES)) {
+                skip("-n", "!");
+
+            }
+        }
+        return noOpUnario;
     }
 
     @Override
@@ -755,10 +1019,10 @@ public class ParserImpl implements Parser {
     }
 
     private String printWaitedTokens(String[] tokens){
-        String formattedString = "";
+        StringBuilder formattedString = new StringBuilder();
         for(String t : tokens){
-            formattedString += "[" + t + "]";
+            formattedString.append("[").append(t).append("]");
         }
-        return formattedString;
+        return formattedString.toString();
     }
 }

@@ -1,15 +1,10 @@
-     # programa exemplo em Pyscal
+# programa exemplo em Pyscal
   	class Pressao2:
   	def bool podeEntregarDepois(bool dizQueSim):
-  		return (true == dizQueSim);
+  		return true;
   	end;
 
   		defstatic void main(String[] args):
-  		write("Caros alunos de Compiladores,");
-
-
-  write("Este eh um codigo de exemplo em Pyscal!");
-
 
   			if(podeEntregarDepois(true)):
   				write("Pode, mas nao tem ponto.");
