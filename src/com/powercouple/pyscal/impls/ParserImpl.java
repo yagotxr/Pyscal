@@ -69,7 +69,9 @@ public class ParserImpl implements Parser {
     }
 
     private void copyToken(){
-        tempToken = new Token(token.getName(), token.getLexeme(), token.getLine(), token.getColumn());
+        if(isNext(Tag.ID)){
+            tempToken = new Token(token.getName(), token.getLexeme(), token.getLine(), token.getColumn());
+        }
     }
 
     //Classe → "class" ID ":" ListaFuncao Main "end" "." 2
@@ -894,7 +896,7 @@ public class ParserImpl implements Parser {
     public No exp4() throws IOException {
         No noExp4 = new No();
         //62
-        copyToken();
+            copyToken();
         if(eat(Tag.ID)){
             exp4_();
 
